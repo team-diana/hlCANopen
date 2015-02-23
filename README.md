@@ -1,5 +1,7 @@
 # hlCANopen
 
+![travis master](https://travis-ci.org/team-diana/hlCANopen.svg?branch=master)
+
 **hlCANopen** is an high-level C++ library for the CANopen protocol.
 
 The library provides a generic and async interface, making its usage simplier in comparision to other libraries.

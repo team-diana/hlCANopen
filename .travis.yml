@@ -3,6 +3,9 @@ compiler:
   - clang
   - gcc
 
+before_install:
+  - sudo apt-get install libboost-dev
+
 before_script:
   - mkdir build
   - cd build
@@ -10,7 +13,6 @@ before_script:
   - make
 
 script:
-  - cd build
   - make test
 
 branches:
