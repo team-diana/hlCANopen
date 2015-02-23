@@ -4,7 +4,8 @@
 
 **hlCANopen** is an high-level C++ library for the CANopen protocol.
 
-The library provides a generic and async interface, making its usage simplier in comparision to other libraries.
+The library provides a generic and async interface, making its usage simpler 
+in comparision to other libraries.
 
 ## Examples
 
@@ -19,25 +20,29 @@ manager(serverNodeId, NodeManagerType::SERVER);
 manager.writeSdoLocal(serverNodeId, SDOIndex(0xabcd, 0), "hello world!");
 manager.writeSdoLocal(serverNodeId, SDOIndex(0xabcd, 1), 0x1234);
 
-// Starts the manager. Now it will answer to the read/write requests from other nodes.
-// Access for each entry is configurable
+// Starts the manager. Now it will answer to the read/write requests 
+// from other nodes. Access for each entry is configurable
 thread managerThread = std::thread([&](){
   manager.run();
 });
 
 // Read a value from an another server in the network
 NodeId otherServerId = 2;
-std::future<SdoResponse<int32_t>> readResult = manager.readSdoRemote<int32_t>(otherServerId, SDOIndex(0xaabb, 0));
-// The returned value is a future, so other actions can be performed while the value is read.
-// New request can also be submitted and executed concurrently when they involve different nodes. 
+std::future<SdoResponse<int32_t>> readResult = 
+    manager.readSdoRemote<int32_t>(otherServerId, SDOIndex(0xaabb, 0));
+// The returned value is a future, so other actions can be performed 
+// while the value is read. New request can also be submitted and 
+// executed concurrently when they involve different nodes. 
 
 // now, get the response
 if(readResult.get().ok()) {
   std::cout << "result is " << readResult.get().get();
 }
 
-// futures allow to write async code sequentially, however it is also possible to use callbacks.
-manager.readSdoRemote<string>(otherServerId, SDOIndex(0xaabb, 0), [](SdoResponse<string> res) {
+// futures allow to write async code sequentially, however it is 
+// also possible to use callbacks.
+manager.readSdoRemote<string>(otherServerId, SDOIndex(0xaabb, 0), 
+[](SdoResponse<string> res) {
   std::cout << "result is " << res.get();
 });
 ```
