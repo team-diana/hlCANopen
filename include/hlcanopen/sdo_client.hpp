@@ -55,6 +55,7 @@ namespace hlcanopen {
         startReadFromNodeCoroutine(sdoIndex);
       }
 
+      /* TODO: check SDO index byte order (inverted) */
       void writeToNode(SDOIndex sdoIndex, const SdoData& data) {
         if(data.size() <= 4)
           writeToNodeExpedited(sdoIndex, data);
@@ -66,7 +67,6 @@ namespace hlcanopen {
         BOOST_ASSERT_MSG(sdoCoroutine != nullptr, "coroutine was not started");
         (*sdoCoroutine)(msg);
       }
-
 
       TransStatus getTransStatus() {
         return currentTransStatus;

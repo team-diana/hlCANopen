@@ -40,6 +40,7 @@ namespace hlcanopen {
     friend std::ostream& operator<< (std::ostream &out, const COBId& cobId);
     bool operator==(const COBId& r) const;
     bool operator!=(const COBId& r) const;
+    bool operator<(const COBId& r) const;
 
   private:
     NodeId nodeId;
@@ -48,6 +49,7 @@ namespace hlcanopen {
 
   struct SDOIndex {
     SDOIndex(unsigned int index, unsigned int subIndex);
+    SDOIndex() {};
 
     friend std::ostream& operator<< (std::ostream &out, const SDOIndex& sdoIndex);
     bool operator==(const SDOIndex& r) const;

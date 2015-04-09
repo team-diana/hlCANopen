@@ -50,6 +50,21 @@ namespace hlcanopen {
       data[3] = (v & 0xff000000) >> 24;
       return data;
     }
+    
+    template<> SdoData convertValue(const uint16_t& v) {
+      SdoData data;
+      data.resize(2);
+      data[0] = (v & 0x00ff);
+      data[1] = (v & 0xff00) >> 8;
+      return data;
+    }
+    
+    template<> SdoData convertValue(const uint8_t& v) {
+      SdoData data;
+      data.resize(1);
+      data[0] = v;
+      return data;
+    }
 
     template<> SdoData convertValue(const int32_t& v) {
       SdoData data;

@@ -60,6 +60,11 @@ bool COBId::operator!=(const COBId& r) const
   return !(*this == r);
 }
 
+bool COBId::operator<(const COBId& r) const // TODO: define a policy
+{
+  return cobTypeValue < r.cobTypeValue || (cobTypeValue == r.cobTypeValue && nodeId < r.nodeId);
+}
+
 std::ostream& operator<<(std::ostream& out, const COBId& cobId)
 {
   return out << "CobId{nodeId=" << cobId.nodeId;
