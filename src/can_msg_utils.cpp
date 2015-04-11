@@ -103,8 +103,8 @@ unsigned int getSdoNumberOfBytesOfDataInMsg(const CanMsg& msg)
 void setSdoNumberOfBytesOfDataInMsgSdoServer(CanMsg& msg, unsigned int numberOfBytes,
                                              SdoServerCommandSpecifier commandSpec)
 {
-  unsigned int shiftNum;
-  unsigned int dataStartsFrom;
+  unsigned int shiftNum = 0;
+  unsigned int dataStartsFrom = 0;
   if(commandSpec == SdoServerCommandSpecifier::INITIATE_UPLOAD_RESPONSE) {
     shiftNum = 2;
     dataStartsFrom = 4;

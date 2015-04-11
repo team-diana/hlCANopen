@@ -24,10 +24,6 @@ namespace hlcanopen {
 
   typedef int PDOIndex;
 
-  class CycleNumber{
-    int cycle;
-  };
-
   struct COBId {
   public:
     COBId();

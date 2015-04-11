@@ -21,6 +21,8 @@
   } \
 } while (0)
 
+template <typename T> void IGNORE(const T& t) {&t;}
+
 namespace hlcanopen {
 
   // Ignore variable in order to remove warnings.

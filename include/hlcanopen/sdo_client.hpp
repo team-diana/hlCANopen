@@ -28,10 +28,6 @@ namespace hlcanopen {
     SDO_RECEIVE_COB_ID = 0b1100
   };
 
-  class SdoTransResponse {
-    TransStatus status;
-  };
-
   template<class C> class SdoClient {
     typedef boost::coroutines::asymmetric_coroutine<CanMsg> coroutine;
 

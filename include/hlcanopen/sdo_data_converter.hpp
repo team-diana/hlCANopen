@@ -12,6 +12,7 @@
 namespace hlcanopen {
 //     template<typename T, typename D> T convert_data(D&& data);
     template<typename T> T convertSdoData(const SdoData& d) {
+      IGNORE(d)
       NOT_IMPLEMENTED_YET;
       // TODO: how to disable this at compile-time?
 //       static_assert(false, "unable to convert to this type.");
@@ -34,10 +35,11 @@ namespace hlcanopen {
     }
 
     template<> std::string convertSdoData<std::string> (const SdoData& d) {
-     return std::string(d.begin(), d.end());
+      return std::string(d.begin(), d.end());
     }
 
     template<typename T> SdoData convertValue(const T& v) {
+      IGNORE(v)
       NOT_IMPLEMENTED_YET
     }
 
