@@ -170,8 +170,8 @@ BOOST_AUTO_TEST_CASE(SdoClientSegmentedWriteTest) {
 
   SDOIndex sdoIndex(0xABCD, 1);
 
-  for(unsigned int testIter; testIter < 50; testIter++) {
-    string valueToWrite = generateString(testIter);
+  for(unsigned int testIter = 0; testIter < 50; testIter++) {
+    string valueToWrite = generateString(testIter + 5);
     SdoData dataToWrite = convertValue(valueToWrite);
     client.writeToNode(sdoIndex, dataToWrite);
 
