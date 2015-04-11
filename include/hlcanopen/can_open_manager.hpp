@@ -43,7 +43,7 @@ public:
   template<typename T> T readSdoLocal(NodeId nodeId, SDOIndex sdoIndex) {
     assertNodeExist(nodeId);
     std::unique_lock<std::mutex> lock(mutex);
-    return nodeManagers[nodeId]->readSdoLocal<T>(sdoIndex);
+    return nodeManagers[nodeId]->template readSdoLocal<T>(sdoIndex);
   }
 
   template<typename T> void writeSdoLocal(NodeId nodeId, SDOIndex sdoIndex, T value) {
@@ -55,14 +55,14 @@ public:
   template<typename T> std::future<SdoResponse<T>> readSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
-    return nodeManagers[nodeId]->readSdoRemote<T>(sdoIndex);
+    return nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex);
   }
 
   template<typename T> void readSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex,
                                             std::function<void(SdoResponse<T>)> callback) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
-    nodeManagers[nodeId]->readSdoRemote<T>(sdoIndex, callback);
+    nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex, callback);
   }
 
   void initNode(NodeId nodeId, NodeManagerType type) {
