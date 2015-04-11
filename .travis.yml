@@ -4,7 +4,7 @@ env:
   - CMAKE_COMPILATION_FLAGS="-DCMAKE_CXX_COMPILER=/usr/bin/g++-4.9 -DCMAKE_C_COMPILER=/usr/bin/gcc-4.9 -DBOOST_ROOT=/opt/boost"
 
 before_install:
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - curl https://www.tamersaadeh.com/diana/deb/pubkey.asc | sudo apt-key add -
   - sudo sh -c 'echo "deb [arch=amd64] http://www.tamersaadeh.com/diana/deb/ all main" > /etc/apt/sources.list.d/team-diana.list'
   - sudo apt-get update
