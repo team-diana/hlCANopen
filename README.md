@@ -61,6 +61,17 @@ gcc 4.9.2
 clang 3.5.1
 ```
 
+## Ubuntu
+Ubuntu still does not provide BOOST 1.57
+it is possible to build it using https://github.com/team-diana/repo-scripts
+
+also, at least gcc-4.9 must be installed:
+http://askubuntu.com/a/456849
+
+Then:
+
+cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/g++-4.9 -DCMAKE_C_COMPILER=/usr/bin/gcc-4.9 -DBOOST_ROOT=/opt/boost
+
 ## Implementation details
 In order to handle multiple nodes concurrently this library uses **Boost Coroutine**. So the 
 cost of having multiples thread is avoided (only a thread for CAN network interface should be used).

@@ -6,6 +6,7 @@ include_directories(include/hlcanopen/)
               #${CMAKE_CURRENT_SOURCE_DIR}/cansim/src/bus.cpp)
 #              )
 
+find_package( Threads )
 
 find_package (Boost COMPONENTS unit_test_framework system REQUIRED)
 include_directories (${TEST_SOURCE_DIR}/src
@@ -21,7 +22,9 @@ function(add_canopen_test TestName files)
   target_link_libraries (${TestName}
                         hlcanopen
                         TestUtils
-                        ${Boost_LIBRARIES})
+                        ${Boost_LIBRARIES}
+                        ${CMAKE_THREAD_LIBS_INIT} 
+                        )
 endfunction(add_canopen_test)
 
 add_canopen_test(Cansim_test "cansim_test.cpp")
