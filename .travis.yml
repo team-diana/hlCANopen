@@ -1,7 +1,7 @@
 language: cpp
-compiler:
-  - clang
-  - gcc
+env:
+  - CMAKE_COMPILATION_FLAGS="-DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.5 -DCMAKE_C_COMPILER=/usr/bin/clang-3.5 -DBOOST_ROOT=/opt/boost"
+  - CMAKE_COMPILATION_FLAGS="-DCMAKE_CXX_COMPILER=/usr/bin/g++-4.9 -DCMAKE_C_COMPILER=/usr/bin/gcc-4.9 -DBOOST_ROOT=/opt/boost"
 
 before_install:
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test
@@ -14,7 +14,7 @@ before_install:
 before_script:
   - mkdir build
   - cd build
-  - cmake ..
+  - cmake .. $CMAKE_COMPILATION_FLAGS
   - make
 
 script:
