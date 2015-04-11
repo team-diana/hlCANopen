@@ -8,7 +8,8 @@ before_install:
   - curl https://www.tamersaadeh.com/diana/deb/pubkey.asc | sudo apt-key add -
   - sudo sh -c 'echo "deb [arch=amd64] http://www.tamersaadeh.com/diana/deb/ all main" > /etc/apt/sources.list.d/team-diana.list'
   - sudo apt-get update
-  - sudo apt-get install g++-4.9
+  - sudo apt-get install g++-4.9 
+  - sudo apt-get install clang-3.5
   - sudo apt-get install boost-all boost-all-dev
 
 before_script:
