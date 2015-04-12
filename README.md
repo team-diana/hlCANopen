@@ -47,6 +47,21 @@ manager.readSdoRemote<string>(otherServerId, SDOIndex(0xaabb, 0),
 });
 ```
 
+## Use
+
+If you use cmake, you can find the package with
+```
+find_package(hlcanopen REQUIRED)
+```
+
+you have to add this line
+
+```
+INITIALIZE_EASYLOGGINGPP
+```
+
+possibly before main() in order to initialize easylogging
+
 ## Build
 ```
 mkdir build && cd build
@@ -65,12 +80,22 @@ clang 3.5.1
 Ubuntu still does not provide BOOST 1.57
 it is possible to build it using https://github.com/team-diana/repo-scripts
 
-also, at least gcc-4.9 must be installed:
+also, at least gcc-4.9 or clang-3.5 must be installed:
 http://askubuntu.com/a/456849
 
 Then:
 
+```
 cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/g++-4.9 -DCMAKE_C_COMPILER=/usr/bin/gcc-4.9 -DBOOST_ROOT=/opt/boost
+```
+
+or using clang:
+
+```
+cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.5 -DCMAKE_C_COMPILER=/usr/bin/clang-3.5 -DBOOST_ROOT=/opt/boost
+```
+
+run the tests to check if everything is everything is fine:
 
 ## Implementation details
 In order to handle multiple nodes concurrently this library uses **Boost Coroutine**. So the 
