@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRemoteWrite) {
   BOOST_CHECK_EQUAL(true, ok);
 
 
-  bool valueReceived = false;
+  volatile bool valueReceived = false;
   managerB.writeSdoRemote<string>(nodeA, sdoIndex2, str, [&](SdoResponse<bool> res){
     BOOST_CHECK_EQUAL(true, res.get());
     valueReceived = true;

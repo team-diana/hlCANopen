@@ -12,10 +12,12 @@
 namespace hlcanopen {
 //     template<typename T, typename D> T convert_data(D&& data);
     template<typename T> T convertSdoData(const SdoData& d) {
-      IGNORE(d)
-      NOT_IMPLEMENTED_YET;
+      IGNORE(d);
+      //NOT_IMPLEMENTED_YET;
       // TODO: how to disable this at compile-time?
 //       static_assert(false, "unable to convert to this type.");
+      T r;
+      return r;
     }
 
     template<> int32_t convertSdoData<int32_t> (const SdoData& d) {

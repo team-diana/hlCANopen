@@ -26,7 +26,6 @@ public:
 
   // Message received from client
   void handleSdoReceive(const CanMsg& msg) {
-    SDOIndex sdoIndex = getSdoIndex(msg);
     if(currentRequest == nullptr) {
       currentRequest = std::make_unique<SdoServerRequest<C>>(nodeId, card, objDict, msg);
     } else {
