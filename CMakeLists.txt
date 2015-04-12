@@ -35,7 +35,7 @@ install(TARGETS hlcanopen
   LIBRARY DESTINATION lib)
 install(DIRECTORY include/
   DESTINATION include)
-install(FILES hlcanopen-config.cmake DESTINATION lib)
+install(FILES hlcanopen-config.cmake DESTINATION lib/cmake/hlcanopen/)
 
 add_subdirectory(test)
 
