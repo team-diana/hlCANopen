@@ -80,7 +80,7 @@ bool SDOIndex::operator!=(const SDOIndex& r) const
 
 std::ostream& operator<<(std::ostream& out, const SDOIndex& sdoIndex)
 {
-  return out << "SDOIndex{index=" << std::hex << sdoIndex.index;
+  return out << "SDOIndex{index=" << std::hex << sdoIndex.index << "}";
 }
 
 }

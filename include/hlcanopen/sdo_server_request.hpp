@@ -209,9 +209,11 @@ private:
 
   bool checkODEntryIsWritable(SDOIndex sdoIndex) {
     if(!objDict.contains(sdoIndex)) {
+      LOG(WARNING) << "Received write request for sdo index " << sdoIndex << " but there is no such entry ";
       abortTransfer(sdoIndex, SdoErrorCode::OBJECT_NOT_IN_DICT);
       return false;
     } else if(objDict.getAccess(sdoIndex) == EntryAccess::READONLY) {
+      LOG(WARNING) << "Received write request for sdo index " << sdoIndex << " but it is not writable";
       abortTransfer(sdoIndex, SdoErrorCode::WRITE_READONLY);
       return false;
     }

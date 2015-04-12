@@ -52,6 +52,10 @@ public:
     return nodeManagers[nodeId]->writeSdoLocal(sdoIndex, value);
   }
 
+  void setSdoAccessLocal(NodeId nodeId, SDOIndex sdoIndex, EntryAccess access) {
+    nodeManagers[nodeId]->setSdoAccessLocal(sdoIndex, access);
+  }
+
   template<typename T> std::future<SdoResponse<T>> readSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
@@ -64,6 +68,20 @@ public:
     std::unique_lock<std::mutex> lock(mutex);
     nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex, callback);
   }
+
+  template<typename T> std::future<SdoResponse<bool>> writeSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex, T value) {
+    initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
+    std::unique_lock<std::mutex> lock(mutex);
+    return nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value);
+  }
+
+  template<typename T> void writeSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex, T value,
+                                            std::function<void(SdoResponse<bool>)> callback) {
+    initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
+    std::unique_lock<std::mutex> lock(mutex);
+    nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value, callback);
+  }
+
 
   void initNode(NodeId nodeId, NodeManagerType type) {
     nodeManagers.emplace(nodeId, std::make_unique<NodeManager<C>>(nodeId, card, type));

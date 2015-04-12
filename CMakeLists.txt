@@ -31,7 +31,7 @@ add_library(hlcanopen SHARED
           )
 target_link_libraries(hlcanopen  ${Boost_LIBRARIES})
 
-install(TARGETS hlcanopen 
+install(TARGETS hlcanopen
   LIBRARY DESTINATION lib)
 install(DIRECTORY include/
   DESTINATION include)

@@ -66,12 +66,16 @@ public:
 
   template<typename T> T readSdoLocal(SDOIndex sdoIndex) {
     ODEntryValue value = objDict.read(sdoIndex);
-    ASSERT_MSG_COUT(typeid(T) == value.type(), "Wrong type for " << sdoIndex);
+    ASSERT_MSG_COUT(typeid(T) != value.type(), "Wrong type for " << sdoIndex);
     return boost::get<T>(value);
   }
 
   template<typename T> void writeSdoLocal(SDOIndex sdoIndex, T value) {
     objDict.write(sdoIndex, ODEntryValue(value));
+  }
+
+  void setSdoAccessLocal(SDOIndex sdoIndex, EntryAccess access) {
+    objDict.setAccess(sdoIndex, access);
   }
 
   template<typename T> std::future<SdoResponse<T>> readSdoRemote(const SDOIndex& sdoIndex) {
@@ -83,6 +87,17 @@ public:
                                             std::function<void(SdoResponse<T>)> callback) {
     assertType(NodeManagerType::CLIENT);
     return sdoClientNodeManager->template readSdo<T>(sdoIndex, callback);
+  }
+
+  template<typename T> std::future<SdoResponse<bool>> writeSdoRemote(const SDOIndex& sdoIndex, T data) {
+    assertType(NodeManagerType::CLIENT);
+    return sdoClientNodeManager->template writeSdo<T>(sdoIndex, data);
+  }
+
+  template<typename T> void writeSdoRemote(const SDOIndex& sdoIndex, T data,
+                                            std::function<void(SdoResponse<bool>)> callback) {
+    assertType(NodeManagerType::CLIENT);
+    sdoClientNodeManager->template writeSdo<T>(sdoIndex, data, callback);
   }
 
 private:

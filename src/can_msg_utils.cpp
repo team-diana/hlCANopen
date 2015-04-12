@@ -123,14 +123,17 @@ void setSdoNumberOfBytesOfDataInMsgSdoClient(CanMsg& msg, unsigned int numberOfB
                                              SdoClientCommandSpecifier commandSpec)
 {
   int shiftNum = 0;
+  int maxBytes =0;
   if(commandSpec == SdoClientCommandSpecifier::INITIATE_DOWNLOAD) {
     shiftNum = 2;
+    maxBytes = 4;
   } else if (commandSpec == SdoClientCommandSpecifier::DOWNLOAD_SEGMENT) {
     shiftNum = 1;
+    maxBytes = 7;
   } else {
     ASSERT_MSG_COUT(false, "Unexpected command spec: " << static_cast<int>(commandSpec));
   }
-  msg[0] = msg[0] | (7-numberOfBytes) << shiftNum;
+  msg[0] = msg[0] | (maxBytes-numberOfBytes) << shiftNum;
 }
 
 bool sdoToggleBitIsSet(const CanMsg& msg)
