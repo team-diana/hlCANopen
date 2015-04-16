@@ -43,6 +43,7 @@ namespace hlcanopen {
     template<typename T> SdoData convertValue(const T& v) {
       IGNORE(v)
       NOT_IMPLEMENTED_YET
+      return T();
     }
 
     template<> SdoData convertValue(const uint32_t& v) {

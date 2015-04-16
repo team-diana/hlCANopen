@@ -12,7 +12,7 @@
 #include "hlcanopen/object_dictionary.hpp"
 #include "hlcanopen/sdo_entry_converter_visitor.hpp"
 
-#include "logging/easylogging++.h"
+#include "hlcanopen/logging/easylogging++.h"
 
 #include <boost/coroutine/asymmetric_coroutine.hpp>
 

@@ -8,7 +8,7 @@
 #include "hlcanopen/object_dictionary.hpp"
 #include "hlcanopen/utils.hpp"
 
-#include "logging/easylogging++.h"
+#include "hlcanopen/logging/easylogging++.h"
 
 #include <chrono>
 #include <thread>

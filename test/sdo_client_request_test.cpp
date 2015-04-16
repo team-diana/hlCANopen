@@ -15,7 +15,7 @@
 
 #include "boost/test/unit_test.hpp"
 
-#include "logging/easylogging++.h"
+#include "hlcanopen/logging/easylogging++.h"
 
 using namespace std;
 using namespace hlcanopen;

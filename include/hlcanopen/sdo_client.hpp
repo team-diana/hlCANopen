@@ -11,7 +11,7 @@
 
 #include <boost/coroutine/asymmetric_coroutine.hpp>
 
-#include "logging/easylogging++.h"
+#include "hlcanopen/logging/easylogging++.h"
 
 namespace hlcanopen {
 

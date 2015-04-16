@@ -4,7 +4,7 @@
 #include "hlcanopen/can_msg.hpp"
 #include "hlcanopen/utils.hpp"
 
-#include "logging/easylogging++.h"
+#include "hlcanopen/logging/easylogging++.h"
 
 
 namespace hlcanopen {

@@ -59,6 +59,7 @@ private:
       if(c.card == card) return c.pipe.read();
     }
     BOOST_ASSERT_MSG(false, "non existent card in sim bus.");
+    return T();
   }
 
 

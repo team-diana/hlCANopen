@@ -16,7 +16,7 @@
 #include <iostream>
 #include <thread>
 
-#include "logging/easylogging++.h"
+#include "hlcanopen/logging/easylogging++.h"
 
 using namespace std;
 using namespace hlcanopen;
