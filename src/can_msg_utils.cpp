@@ -10,8 +10,8 @@
 namespace hlcanopen {
 
 void setSdoIndex(CanMsg& msg, const SDOIndex& sdoIndex) {
-  msg[1] = sdoIndex.index >> 8;
-  msg[2] = sdoIndex.index & 0x00ff;
+  msg[1] = sdoIndex.index & 0x00ff;
+  msg[2] = sdoIndex.index >> 8;
   msg[3] = sdoIndex.subIndex;
 }
 
