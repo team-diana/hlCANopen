@@ -135,7 +135,8 @@ namespace hlcanopen {
       setSdoExpeditedTransfer(clientReq, true);
       setSdoIndex(clientReq, sdoIndex);
       setSdoNumberOfBytesOfDataInMsgSdoClient(clientReq, data.size(),
-                                              SdoClientCommandSpecifier::INITIATE_DOWNLOAD);
+                                             SdoClientCommandSpecifier::INITIATE_DOWNLOAD);
+      setSdoSizeBit(clientReq, true);
       for(unsigned int i = 0; i < data.size(); i++) clientReq[4+i] = data[i];
 
       card.write(clientReq);
