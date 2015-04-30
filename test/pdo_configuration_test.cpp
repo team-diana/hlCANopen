@@ -11,6 +11,9 @@
 #include "hlcanopen/pdo_configuration.hpp"
 #include "hlcanopen/pdo_client.hpp"
 
+#include "hlcanopen/logging/easylogging++.h"
+
+
 #include "test_utils.hpp"
 
 #include "cansim/bi_pipe.hpp"
@@ -18,7 +21,6 @@
 
 #include "boost/test/unit_test.hpp"
 
-#include "logging/easylogging++.h"
 
 using namespace std;
 using namespace hlcanopen;
