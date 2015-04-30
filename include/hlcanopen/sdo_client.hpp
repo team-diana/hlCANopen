@@ -11,7 +11,7 @@
 
 #include <boost/coroutine/asymmetric_coroutine.hpp>
 
-#include "logging/easylogging++.h"
+#include "hlcanopen/logging/easylogging++.h"
 
 namespace hlcanopen {
 
@@ -26,10 +26,6 @@ namespace hlcanopen {
   enum {
     SDO_TRANSMIT_COB_ID = 0b1011,
     SDO_RECEIVE_COB_ID = 0b1100
-  };
-
-  class SdoTransResponse {
-    TransStatus status;
   };
 
   template<class C> class SdoClient {
@@ -194,6 +190,7 @@ namespace hlcanopen {
                 clientSegment.cobId = makeReqCobId();
                 setSdoClientCommandSpecifier(clientSegment, SdoClientCommandSpecifier::DOWNLOAD_SEGMENT);
                 setSdoToggleBit(clientSegment, nextToggleBit);
+                nextToggleBit = !nextToggleBit;
                 int i = 0;
                 for(i = 0; i < 7 && currentByteToSend < data.size(); i++) {
                   clientSegment[1+i] = data[currentByteToSend++];

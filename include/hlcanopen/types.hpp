@@ -14,19 +14,26 @@ namespace hlcanopen {
   typedef std::vector<uint8_t> SdoData;
 
   typedef unsigned int NodeId;
+
   enum class COBType {
     NMT, SYNC, TIMESTAMP, EMERGENCY, PDO, SDO_TRANSMIT, SDO_RECEIVE, ERROR_CONTROL
   };
+
   enum COBTypeUniqueCode {
     SDO_TRANSMIT_UNIQUE_CODE = 0b1011,
     SDO_RECEIVE_UNIQUE_CODE = 0b1100
   };
 
-  typedef int PDOIndex;
-
-  class CycleNumber{
-    int cycle;
+  enum NMTMESSAGES {
+    NMT_START_REMOTE_NODE = 0x01,
+    NMT_STOP_REMOTE_NODE = 0x02,
+    NMT_ENTER_PRE_OPERATIONAL = 0x80,
+    NMT_RESET_NODE = 0x81,
+    NMT_RESET_COMMUNICATION = 0x82
   };
+
+
+  typedef int PDOIndex;
 
   struct COBId {
   public:

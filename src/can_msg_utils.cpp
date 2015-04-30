@@ -4,14 +4,14 @@
 #include "hlcanopen/can_msg.hpp"
 #include "hlcanopen/utils.hpp"
 
-#include "logging/easylogging++.h"
+#include "hlcanopen/logging/easylogging++.h"
 
 
 namespace hlcanopen {
 
 void setSdoIndex(CanMsg& msg, const SDOIndex& sdoIndex) {
-  msg[1] = sdoIndex.index >> 8;
-  msg[2] = sdoIndex.index & 0x00ff;
+  msg[1] = sdoIndex.index & 0x00ff;
+  msg[2] = sdoIndex.index >> 8;
   msg[3] = sdoIndex.subIndex;
 }
 
@@ -103,8 +103,8 @@ unsigned int getSdoNumberOfBytesOfDataInMsg(const CanMsg& msg)
 void setSdoNumberOfBytesOfDataInMsgSdoServer(CanMsg& msg, unsigned int numberOfBytes,
                                              SdoServerCommandSpecifier commandSpec)
 {
-  unsigned int shiftNum;
-  unsigned int dataStartsFrom;
+  unsigned int shiftNum = 0;
+  unsigned int dataStartsFrom = 0;
   if(commandSpec == SdoServerCommandSpecifier::INITIATE_UPLOAD_RESPONSE) {
     shiftNum = 2;
     dataStartsFrom = 4;
@@ -123,14 +123,17 @@ void setSdoNumberOfBytesOfDataInMsgSdoClient(CanMsg& msg, unsigned int numberOfB
                                              SdoClientCommandSpecifier commandSpec)
 {
   int shiftNum = 0;
+  int maxBytes =0;
   if(commandSpec == SdoClientCommandSpecifier::INITIATE_DOWNLOAD) {
     shiftNum = 2;
+    maxBytes = 4;
   } else if (commandSpec == SdoClientCommandSpecifier::DOWNLOAD_SEGMENT) {
     shiftNum = 1;
+    maxBytes = 7;
   } else {
     ASSERT_MSG_COUT(false, "Unexpected command spec: " << static_cast<int>(commandSpec));
   }
-  msg[0] = msg[0] | (7-numberOfBytes) << shiftNum;
+  msg[0] = msg[0] | (maxBytes-numberOfBytes) << shiftNum;
 }
 
 bool sdoToggleBitIsSet(const CanMsg& msg)

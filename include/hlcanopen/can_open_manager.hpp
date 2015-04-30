@@ -8,7 +8,7 @@
 #include "hlcanopen/object_dictionary.hpp"
 #include "hlcanopen/utils.hpp"
 
-#include "logging/easylogging++.h"
+#include "hlcanopen/logging/easylogging++.h"
 
 #include <chrono>
 #include <thread>
@@ -40,10 +40,38 @@ public:
     }
   }
 
+
+  void resetCommunication(u_int8_t nodeId)
+  {
+      sendNMT(NMT_RESET_COMMUNICATION, nodeId);
+  }
+
+  void resetNode(u_int8_t nodeId)
+  {
+      sendNMT(NMT_RESET_NODE, nodeId);
+  }
+
+  void startRemoteNode(u_int8_t nodeId)
+  {
+      sendNMT(NMT_START_REMOTE_NODE, nodeId);
+  }
+
+  void sendNMT(uint8_t command, uint8_t CANid)
+  {
+      CanMsg msg;
+
+
+      msg.cobId = COBId(0, 0);
+      msg[0] = command;
+      msg[1] = CANid;
+
+      card.write(msg);
+  }
+
   template<typename T> T readSdoLocal(NodeId nodeId, SDOIndex sdoIndex) {
     assertNodeExist(nodeId);
     std::unique_lock<std::mutex> lock(mutex);
-    return nodeManagers[nodeId]->readSdoLocal<T>(sdoIndex);
+    return nodeManagers[nodeId]->template readSdoLocal<T>(sdoIndex);
   }
 
   template<typename T> void writeSdoLocal(NodeId nodeId, SDOIndex sdoIndex, T value) {
@@ -52,18 +80,36 @@ public:
     return nodeManagers[nodeId]->writeSdoLocal(sdoIndex, value);
   }
 
+  void setSdoAccessLocal(NodeId nodeId, SDOIndex sdoIndex, EntryAccess access) {
+    nodeManagers[nodeId]->setSdoAccessLocal(sdoIndex, access);
+  }
+
   template<typename T> std::future<SdoResponse<T>> readSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
-    return nodeManagers[nodeId]->readSdoRemote<T>(sdoIndex);
+    return nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex);
   }
 
   template<typename T> void readSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex,
                                             std::function<void(SdoResponse<T>)> callback) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
-    nodeManagers[nodeId]->readSdoRemote<T>(sdoIndex, callback);
+    nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex, callback);
   }
+
+  template<typename T> std::future<SdoResponse<bool>> writeSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex, T value) {
+    initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
+    std::unique_lock<std::mutex> lock(mutex);
+    return nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value);
+  }
+
+  template<typename T> void writeSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex, T value,
+                                            std::function<void(SdoResponse<bool>)> callback) {
+    initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
+    std::unique_lock<std::mutex> lock(mutex);
+    nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value, callback);
+  }
+
 
   void initNode(NodeId nodeId, NodeManagerType type) {
     nodeManagers.emplace(nodeId, std::make_unique<NodeManager<C>>(nodeId, card, type));

@@ -7,7 +7,7 @@
 
 #include <boost/variant/static_visitor.hpp>
 
-#include "logging/easylogging++.h"
+#include "hlcanopen/logging/easylogging++.h"
 
 namespace hlcanopen {
 

@@ -38,7 +38,7 @@ public:
     }
   }
 
-  template<typename T> std::future<SdoResponse<T>> readSdo(const SDOIndex& sdoIndex) override {
+  template<typename T> std::future<SdoResponse<T>> readSdo(const SDOIndex& sdoIndex) {
     SdoClientReadRequestPromise<T>* request = new SdoClientReadRequestPromise<T>(sdoIndex);
     std::future<SdoResponse<T>> future = request->getFuture();
     sdoClientRequests.push(std::unique_ptr<SdoClientReadRequestPromise<T>>(request));
@@ -47,14 +47,14 @@ public:
   }
 
   template<typename T> void readSdo(const SDOIndex& sdoIndex,
-                                    std::function<void(SdoResponse<T>)> callback) override {
+                                    std::function<void(SdoResponse<T>)> callback) {
     std::unique_ptr<SdoClientRequest> request =
         std::make_unique<SdoClientReadRequestCallback<T>>(sdoIndex, callback);
     sdoClientRequests.push(std::move(request));
     startNextSdoRequestIfPossible();
   }
 
-  template<typename T> std::future<SdoResponse<bool>> writeSdo(const SDOIndex& sdoIndex, T value) override {
+  template<typename T> std::future<SdoResponse<bool>> writeSdo(const SDOIndex& sdoIndex, T value) {
     SdoData sdoData = convertValue<T>(value);
     SdoClientWriteRequestPromise* request = new SdoClientWriteRequestPromise(sdoIndex, sdoData);
     std::future<SdoResponse<bool>> future = request->getFuture();
@@ -64,7 +64,7 @@ public:
   }
 
   template<typename T> void writeSdo(const SDOIndex& sdoIndex, T value,
-                                    std::function<void(SdoResponse<bool>)> callback) override {
+                                    std::function<void(SdoResponse<bool>)> callback) {
     SdoData sdoData = convertValue<T>(value);
     std::unique_ptr<SdoClientRequest> request =
         std::make_unique<SdoClientWriteRequestCallback>(sdoIndex, sdoData, callback);

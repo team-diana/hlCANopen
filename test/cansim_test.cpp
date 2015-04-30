@@ -10,7 +10,7 @@
 #include <thread>
 #include <vector>
 
-#include "logging/easylogging++.h"
+#include "hlcanopen/logging/easylogging++.h"
 
 INITIALIZE_EASYLOGGINGPP
 

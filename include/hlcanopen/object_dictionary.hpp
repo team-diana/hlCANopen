@@ -37,6 +37,7 @@ namespace hlcanopen {
       if(entry.access == EntryAccess::READONLY) {
         return false;
       } else entry.value = value;
+      return true;
     }
 
     ODEntryValue read(SDOIndex index) {

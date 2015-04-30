@@ -26,15 +26,13 @@ public:
 
   // Message received from client
   void handleSdoReceive(const CanMsg& msg) {
-    SDOIndex sdoIndex = getSdoIndex(msg);
-    if(requestsMap.find(sdoIndex) == requestsMap.end()) {
-      requestsMap.emplace(sdoIndex, std::make_unique<SdoServerRequest<C>>(nodeId, card, objDict, msg));
+    if(currentRequest == nullptr) {
+      currentRequest = std::make_unique<SdoServerRequest<C>>(nodeId, card, objDict, msg);
     } else {
-      SdoServerRequest<C>* request = requestsMap[sdoIndex].get();
-      request->newMsg(msg);
-      if(request->isCompleted()) {
-        requestsMap.erase(sdoIndex);
-      }
+      currentRequest->newMsg(msg);
+    }
+    if(currentRequest->isCompleted()) {
+      currentRequest = nullptr;
     }
   }
 
@@ -42,7 +40,8 @@ private:
   NodeId nodeId;
   C& card;
   ObjectDictionary& objDict;
-  std::map<SDOIndex, std::unique_ptr<SdoServerRequest<C>>, SDOIndexCompare> requestsMap;
+  std::unique_ptr<SdoServerRequest<C>> currentRequest;
+//   std::map<SDOIndex, std::unique_ptr<SdoServerRequest<C>>, SDOIndexCompare> requestsMap;
 };
 
 }

@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 2.6)
 project(hlcanopen)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
 include(CheckCXXCompilerFlag)
 
 CHECK_CXX_COMPILER_FLAG("-std=c++1y" COMPILER_SUPPORTS_CXX1Y)
@@ -14,8 +12,9 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
 
+SET(BOOST_MIN_VERSION "1.57.0")
 find_package(Boost
-  # [version] [EXACT]
+  ${BOOST_MIN_VERSION}
   REQUIRED
   COMPONENTS system coroutine
 )
@@ -32,7 +31,11 @@ add_library(hlcanopen SHARED
           )
 target_link_libraries(hlcanopen  ${Boost_LIBRARIES})
 
-# install(TARGETS hlcanopen RUNTIME DESTINATION bin)
+install(TARGETS hlcanopen
+  LIBRARY DESTINATION lib)
+install(DIRECTORY include/
+  DESTINATION include)
+install(FILES hlcanopen-config.cmake DESTINATION lib/cmake/hlcanopen/)
 
 add_subdirectory(test)
 
