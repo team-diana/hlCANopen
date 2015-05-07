@@ -103,7 +103,9 @@ public:
   }
   
   void updateQueue() {
-    sdoClientNodeManager->updateQueue();
+    if (sdoClientNodeManager == nullptr)
+      std::cout << "NULL pointer" << std::endl;
+    else sdoClientNodeManager->updateQueue();
   }
 
 private:

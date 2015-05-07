@@ -74,10 +74,20 @@ public:
   }
   
   void updateQueue() {
-    while (!isValid(sdoClientRequests.front()->timestamp)) {
-      sdoClientRequests.front()->visitTimeout(*this);
-      if (sdoClientRequests.size() == 0)
+//    while ( && !isValid(sdoClientRequests.front()->timestamp)) {
+    while (true) {
+      std::cout << "Tb1" << std::endl;
+      if (sdoClientRequests.empty()) {
+        std::cout << "Tb2" << std::endl;
 	return;
+      }
+      std::cout << "Tb3" << std::endl;
+      if (isValid(sdoClientRequests.front()->timestamp)) {
+        std::cout << "Tb4" << std::endl;
+	return;
+      }
+      std::cout << "Tb5" << std::endl;
+      sdoClientRequests.front()->visitTimeout(*this);
     }
   }
 

@@ -46,4 +46,5 @@ add_test (NAME SdoClientRequest COMMAND SdoClientRequest_test)
 add_test (NAME SdoServerRequest COMMAND SdoServerRequest_test)
 add_test (NAME SdoClientNodeManager COMMAND SdoClientNodeManager_test)
 add_test (NAME SdoCanOpenManager COMMAND SdoCanOpenManager_test)
+add_test (NAME SdoCanOpenManagerTimeout COMMAND SdoCanOpenManagerTimeout_test)
 
