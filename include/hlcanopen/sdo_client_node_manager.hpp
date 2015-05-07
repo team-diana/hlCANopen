@@ -38,8 +38,8 @@ public:
     }
   }
 
-  template<typename T> std::future<SdoResponse<T>> readSdo(const SDOIndex& sdoIndex) {
-    SdoClientReadRequestPromise<T>* request = new SdoClientReadRequestPromise<T>(sdoIndex);
+  template<typename T> std::future<SdoResponse<T>> readSdo(const SDOIndex& sdoIndex, long timeout = 5000) {
+    SdoClientReadRequestPromise<T>* request = new SdoClientReadRequestPromise<T>(sdoIndex, timeout);
     std::future<SdoResponse<T>> future = request->getFuture();
     sdoClientRequests.push(std::unique_ptr<SdoClientReadRequestPromise<T>>(request));
     startNextSdoRequestIfPossible();
@@ -47,16 +47,17 @@ public:
   }
 
   template<typename T> void readSdo(const SDOIndex& sdoIndex,
-                                    std::function<void(SdoResponse<T>)> callback) {
+                                    std::function<void(SdoResponse<T>)> callback, long timeout = 5000) {
     std::unique_ptr<SdoClientRequest> request =
-        std::make_unique<SdoClientReadRequestCallback<T>>(sdoIndex, callback);
+        std::make_unique<SdoClientReadRequestCallback<T>>(sdoIndex, callback, timeout);
     sdoClientRequests.push(std::move(request));
     startNextSdoRequestIfPossible();
   }
 
-  template<typename T> std::future<SdoResponse<bool>> writeSdo(const SDOIndex& sdoIndex, T value) {
+  template<typename T> std::future<SdoResponse<bool>> writeSdo(const SDOIndex& sdoIndex, T value,
+							       long timeout = 5000) {
     SdoData sdoData = convertValue<T>(value);
-    SdoClientWriteRequestPromise* request = new SdoClientWriteRequestPromise(sdoIndex, sdoData);
+    SdoClientWriteRequestPromise* request = new SdoClientWriteRequestPromise(sdoIndex, sdoData, timeout); /* XXX TO in promise? */
     std::future<SdoResponse<bool>> future = request->getFuture();
     sdoClientRequests.push(std::unique_ptr<SdoClientWriteRequest>(request));
     startNextSdoRequestIfPossible();
@@ -64,12 +65,20 @@ public:
   }
 
   template<typename T> void writeSdo(const SDOIndex& sdoIndex, T value,
-                                    std::function<void(SdoResponse<bool>)> callback) {
+                                    std::function<void(SdoResponse<bool>)> callback, long timeout = 5000) {
     SdoData sdoData = convertValue<T>(value);
     std::unique_ptr<SdoClientRequest> request =
-        std::make_unique<SdoClientWriteRequestCallback>(sdoIndex, sdoData, callback);
+        std::make_unique<SdoClientWriteRequestCallback>(sdoIndex, sdoData, callback, timeout);
     sdoClientRequests.push(std::move(request));
     startNextSdoRequestIfPossible();
+  }
+  
+  void updateQueue() {
+    while (!isValid(sdoClientRequests.front()->timestamp)) {
+      sdoClientRequests.front()->visitTimeout(*this);
+      if (sdoClientRequests.size() == 0)
+	return;
+    }
   }
 
 private:
@@ -100,20 +109,41 @@ private:
     endRequest();
   }
 
+  void visitSdoClientRequestTimeout(SdoClientReadRequest& request) override {
+    request.completeRequestWithTimeout();
+  }
+
   void visitSdoClientRequestEnd(SdoClientWriteRequest& request) override {
     TransStatus transStatus = sdoClient.getTransStatus();
     if(transStatus == TransStatus::END_ERR) {
       request.completeRequestWithFail(sdoClient.getSdoError());
+    } else if(transStatus == TransStatus::END_TIMEOUT) { /* XXX */
+      request.completeRequestWithTimeout();
     } else if(transStatus == TransStatus::END_OK) {
       request.completeRequest();
     }
     endRequest();
   }
 
+  void visitSdoClientRequestTimeout(SdoClientWriteRequest& request) override {
+    request.completeRequestWithTimeout();
+  }
+  
   void endRequest() {
       sdoClientRequests.pop();
       sdoClient.cleanForNextRequest();
       startNextSdoRequestIfPossible();
+  }
+
+  bool isValid(long timestamp) {
+    return getTimestamp() < timestamp;
+  }
+  
+  long getTimestamp() {
+    auto ts = std::chrono::duration_cast< std::chrono::milliseconds >(
+		  std::chrono::system_clock::now().time_since_epoch())
+		  .count();
+    return ts;
   }
 
 private:

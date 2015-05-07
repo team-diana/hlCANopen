@@ -19,8 +19,8 @@ namespace hlcanopen {
 
 template<typename T> class SdoClientReadRequestPromise : public SdoClientReadRequest {
 public:
-  SdoClientReadRequestPromise(SDOIndex sdoIndex) :
-   SdoClientReadRequest(sdoIndex),
+  SdoClientReadRequestPromise(SDOIndex sdoIndex, long timeout) :
+   SdoClientReadRequest(sdoIndex, timeout),
    promise() {
 
   }
@@ -34,6 +34,10 @@ public:
     promise.set_value(SdoResponse<T>(0, error));
   }
 
+  void completeRequestWithTimeout() override { /* XXX */
+    promise.set_value(SdoResponse<T>(0));
+  }
+
   std::future<SdoResponse<T>> getFuture() {
     return promise.get_future();
   }
@@ -44,8 +48,8 @@ private:
 
 class SdoClientWriteRequestPromise : public SdoClientWriteRequest {
 public:
-  SdoClientWriteRequestPromise(SDOIndex sdoIndex, SdoData sdoData) :
-   SdoClientWriteRequest(sdoIndex, sdoData),
+  SdoClientWriteRequestPromise(SDOIndex sdoIndex, SdoData sdoData, long timeout) :
+   SdoClientWriteRequest(sdoIndex, sdoData, timeout),
    promise() {}
   virtual ~SdoClientWriteRequestPromise() {}
 
@@ -55,6 +59,10 @@ public:
 
   void completeRequestWithFail(const SdoError& error) override {
     promise.set_value(SdoResponse<bool>(true, error));
+  }
+
+  void completeRequestWithTimeout() override {
+    promise.set_value(SdoResponse<bool>(false)); /* XXX */
   }
 
   std::future<SdoResponse<bool>> getFuture() {

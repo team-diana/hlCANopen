@@ -4,6 +4,7 @@
 #define OCO_SDO_CLIENT_REQUEST_HPP
 
 #include "hlcanopen/types.hpp"
+#include "hlcanopen/utils.hpp"
 #include "hlcanopen/sdo_error.hpp"
 
 namespace hlcanopen {
@@ -22,36 +23,54 @@ public:
     virtual void visitSdoClientRequestStart(const SdoClientWriteRequest& request) = 0;
     virtual void visitSdoClientRequestEnd(SdoClientReadRequest& request) = 0;
     virtual void visitSdoClientRequestEnd(SdoClientWriteRequest& request) = 0;
+    virtual void visitSdoClientRequestTimeout(SdoClientReadRequest& request) = 0;
+    virtual void visitSdoClientRequestTimeout(SdoClientWriteRequest& request) = 0;
 };
 
 class SdoClientRequest {
 public:
-  SdoClientRequest(SDOIndex sdoIndex) :
-  sdoIndex(sdoIndex) {}
+  SdoClientRequest(SDOIndex sdoIndex, long timeout) :
+  sdoIndex(sdoIndex),
+  timestamp(getTimestamp() + timeout) {}
 
   virtual ~SdoClientRequest() {}
 
   virtual void visitStart(SdoRequestVisitor& visitor) = 0;
   virtual void visitEnd(SdoRequestVisitor& visitor) = 0;
+  virtual void visitTimeout(SdoRequestVisitor& visitor) = 0;
 
   SDOIndex sdoIndex;
+
+  long timestamp;
+
+private:
+  long getTimestamp() {
+    auto ts = std::chrono::duration_cast< std::chrono::milliseconds >(
+		  std::chrono::system_clock::now().time_since_epoch())
+		  .count();
+    return ts;
+  }
 };
 
 class SdoClientReadRequest : public SdoClientRequest {
 public:
   // The value of typeToken is not actually used, only its type it's needed.
-  SdoClientReadRequest(SDOIndex sdoIndex) :
-    SdoClientRequest(sdoIndex) {}
+  SdoClientReadRequest(SDOIndex sdoIndex, long timeout) :
+    SdoClientRequest(sdoIndex, timeout) {}
   virtual ~SdoClientReadRequest() {}
 
   virtual void completeRequest(const SdoData& sdoData) = 0;
   virtual void completeRequestWithFail(const SdoError& error) = 0;
+  virtual void completeRequestWithTimeout() = 0;
 
   virtual void visitStart(SdoRequestVisitor& visitor) override {
       visitor.visitSdoClientRequestStart(*this);
   }
   virtual void visitEnd(SdoRequestVisitor& visitor) override {
       visitor.visitSdoClientRequestEnd(*this);
+  }
+  virtual void visitTimeout(SdoRequestVisitor& visitor) override {
+      visitor.visitSdoClientRequestTimeout(*this);
   }
 
 };
@@ -59,19 +78,23 @@ public:
 class SdoClientWriteRequest : public SdoClientRequest {
 public:
   // The value of typeToken is not actually used, only its type it's needed.
-  SdoClientWriteRequest(SDOIndex sdoIndex, SdoData sdoData) :
-    SdoClientRequest(sdoIndex),
+  SdoClientWriteRequest(SDOIndex sdoIndex, SdoData sdoData, long timeout) :
+    SdoClientRequest(sdoIndex, timeout),
     sdoData(sdoData) {}
   virtual ~SdoClientWriteRequest() {};
 
   virtual void completeRequest() = 0;
   virtual void completeRequestWithFail(const SdoError& error) = 0;
+  virtual void completeRequestWithTimeout() = 0;
 
   virtual void visitStart(SdoRequestVisitor& visitor) override {
       visitor.visitSdoClientRequestStart(*this);
   }
   virtual void visitEnd(SdoRequestVisitor& visitor) override {
       visitor.visitSdoClientRequestEnd(*this);
+  }
+  virtual void visitTimeout(SdoRequestVisitor& visitor) override {
+      visitor.visitSdoClientRequestTimeout(*this);
   }
 
   SdoData sdoData;

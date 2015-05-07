@@ -17,8 +17,9 @@ namespace hlcanopen {
 
 template<class T> class SdoClientReadRequestCallback : public SdoClientReadRequest {
 public:
-  SdoClientReadRequestCallback(SDOIndex sdoIndex, std::function<void(SdoResponse<T> v)> callback) :
-    SdoClientReadRequest(sdoIndex),
+  SdoClientReadRequestCallback(SDOIndex sdoIndex, std::function<void(SdoResponse<T> v)> callback,
+			       long timeout) :
+    SdoClientReadRequest(sdoIndex, timeout),
     callback(callback) {}
   ~SdoClientReadRequestCallback() {};
 
@@ -33,6 +34,12 @@ public:
     callCallback(sdoResponse);
   }
 
+  virtual void completeRequestWithTimeout() override  {
+    const SdoError& err = SdoError(TIMEOUT);
+    const SdoResponse<T> sdoResponse(T(), err);
+    callCallback(sdoResponse);
+  }
+  
 protected:
   void callCallback(const SdoResponse<T>& sdoResponse) {
     callback(sdoResponse);
@@ -45,8 +52,9 @@ private:
 class SdoClientWriteRequestCallback : public SdoClientWriteRequest {
 public:
   SdoClientWriteRequestCallback(SDOIndex sdoIndex, SdoData sdoData,
-                                   std::function<void(SdoResponse<bool> v)> callback) :
-                                SdoClientWriteRequest(sdoIndex, sdoData),
+                                   std::function<void(SdoResponse<bool> v)> callback,
+				   long timeout) :
+                                SdoClientWriteRequest(sdoIndex, sdoData, timeout),
                                 callback(callback) {}
   virtual ~SdoClientWriteRequestCallback() {}
 
@@ -55,6 +63,9 @@ public:
   }
   void completeRequestWithFail(const SdoError& error) override {
     callback(SdoResponse<bool>(false, error));
+  }
+  void completeRequestWithTimeout() override {
+    callback(SdoResponse<bool>(false, SdoError(TIMEOUT))); /* XXX */
   }
 
 private:

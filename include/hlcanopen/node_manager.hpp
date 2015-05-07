@@ -78,26 +78,32 @@ public:
     objDict.setAccess(sdoIndex, access);
   }
 
-  template<typename T> std::future<SdoResponse<T>> readSdoRemote(const SDOIndex& sdoIndex) {
+  template<typename T> std::future<SdoResponse<T>> readSdoRemote(const SDOIndex& sdoIndex, long timeout = 5000) {
     assertType(NodeManagerType::CLIENT);
-    return sdoClientNodeManager->template readSdo<T>(sdoIndex);
+    return sdoClientNodeManager->template readSdo<T>(sdoIndex, timeout);
   }
 
   template<typename T> void readSdoRemote(const SDOIndex& sdoIndex,
-                                            std::function<void(SdoResponse<T>)> callback) {
+                                            std::function<void(SdoResponse<T>)> callback, long timeout = 5000) {
     assertType(NodeManagerType::CLIENT);
-    return sdoClientNodeManager->template readSdo<T>(sdoIndex, callback);
+    return sdoClientNodeManager->template readSdo<T>(sdoIndex, callback, timeout);
   }
 
-  template<typename T> std::future<SdoResponse<bool>> writeSdoRemote(const SDOIndex& sdoIndex, T data) {
+  template<typename T> std::future<SdoResponse<bool>> writeSdoRemote(const SDOIndex& sdoIndex, T data,
+								     long timeout = 5000) {
     assertType(NodeManagerType::CLIENT);
-    return sdoClientNodeManager->template writeSdo<T>(sdoIndex, data);
+    return sdoClientNodeManager->template writeSdo<T>(sdoIndex, data, timeout);
   }
 
   template<typename T> void writeSdoRemote(const SDOIndex& sdoIndex, T data,
-                                            std::function<void(SdoResponse<bool>)> callback) {
+                                            std::function<void(SdoResponse<bool>)> callback,
+					    long timeout = 5000) {
     assertType(NodeManagerType::CLIENT);
-    sdoClientNodeManager->template writeSdo<T>(sdoIndex, data, callback);
+    sdoClientNodeManager->template writeSdo<T>(sdoIndex, data, callback, timeout);
+  }
+  
+  void updateQueue() {
+    sdoClientNodeManager->updateQueue();
   }
 
 private:

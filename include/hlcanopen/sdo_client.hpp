@@ -20,7 +20,8 @@ namespace hlcanopen {
     NO_TRANS,
     CONT,
     END_OK,
-    END_ERR
+    END_ERR,
+    END_TIMEOUT
   };
 
   enum {
@@ -85,7 +86,8 @@ namespace hlcanopen {
 
       bool transmissionIsEnded() {
         return currentTransStatus == TransStatus::END_OK ||
-               currentTransStatus == TransStatus::END_ERR;
+               currentTransStatus == TransStatus::END_ERR ||
+               currentTransStatus == TransStatus::END_TIMEOUT;
       }
 
   private:
