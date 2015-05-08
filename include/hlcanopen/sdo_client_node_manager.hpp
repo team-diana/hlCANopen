@@ -72,21 +72,16 @@ public:
     sdoClientRequests.push(std::move(request));
     startNextSdoRequestIfPossible();
   }
-  
+
   void updateQueue() {
 //    while ( && !isValid(sdoClientRequests.front()->timestamp)) {
     while (true) {
-      std::cout << "Tb1" << std::endl;
       if (sdoClientRequests.empty()) {
-        std::cout << "Tb2" << std::endl;
-	return;
+        return;
       }
-      std::cout << "Tb3" << std::endl;
       if (isValid(sdoClientRequests.front()->timestamp)) {
-        std::cout << "Tb4" << std::endl;
-	return;
+        return;
       }
-      std::cout << "Tb5" << std::endl;
       sdoClientRequests.front()->visitTimeout(*this);
     }
   }
@@ -121,6 +116,7 @@ private:
 
   void visitSdoClientRequestTimeout(SdoClientReadRequest& request) override {
     request.completeRequestWithTimeout();
+    endRequest();
   }
 
   void visitSdoClientRequestEnd(SdoClientWriteRequest& request) override {
@@ -137,8 +133,9 @@ private:
 
   void visitSdoClientRequestTimeout(SdoClientWriteRequest& request) override {
     request.completeRequestWithTimeout();
+    endRequest();
   }
-  
+
   void endRequest() {
       sdoClientRequests.pop();
       sdoClient.cleanForNextRequest();
@@ -148,7 +145,7 @@ private:
   bool isValid(long timestamp) {
     return getTimestamp() < timestamp;
   }
-  
+
   long getTimestamp() {
     auto ts = std::chrono::duration_cast< std::chrono::milliseconds >(
 		  std::chrono::system_clock::now().time_since_epoch())

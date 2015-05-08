@@ -31,11 +31,12 @@ public:
   }
 
   void completeRequestWithFail(const SdoError& error) override {
-    promise.set_value(SdoResponse<T>(0, error));
+    promise.set_value(SdoResponse<T>(error));
   }
 
   void completeRequestWithTimeout() override { /* XXX */
-    promise.set_value(SdoResponse<T>(0));
+    const SdoError error(SdoErrorCode::TIMEOUT);
+    promise.set_value(SdoResponse<T>(error));
   }
 
   std::future<SdoResponse<T>> getFuture() {
@@ -62,7 +63,8 @@ public:
   }
 
   void completeRequestWithTimeout() override {
-    promise.set_value(SdoResponse<bool>(false)); /* XXX */
+    const SdoError error = SdoError(SdoErrorCode::TIMEOUT);
+    promise.set_value(SdoResponse<bool>(false, error)); /* XXX */
   }
 
   std::future<SdoResponse<bool>> getFuture() {

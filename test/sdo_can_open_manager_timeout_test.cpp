@@ -26,80 +26,56 @@ typedef Bus<CanMsg> TestBus;
 typedef Card<CanMsg> TestCard;
 
 BOOST_AUTO_TEST_CASE(SdoCanOpenManagerTimeoutRemoteRead) {
-#if 0
   std::shared_ptr<TestBus> bus = std::make_shared<TestBus>();
   TestCard cardA(1, bus);
   TestCard cardB(2, bus);
 
-  CanOpenManager<TestCard> managerA(cardA, std::chrono::milliseconds(0));
   NodeId nodeA = 1;
-  managerA.initNode(nodeA, NodeManagerType::SERVER);
   SDOIndex sdoIndex1(0xABCD, 1);
   SDOIndex sdoIndex2(0xDDEE, 0);
-
-  int32_t value=0xAABBCCDD;
-  managerA.writeSdoLocal(nodeA, sdoIndex1, value);
-  string str = "hello world!";
-  managerA.writeSdoLocal(nodeA, sdoIndex2, str);
-
-  thread at = thread([&](){
-    managerA.run();
-  });
 
 
   CanOpenManager<TestCard> managerB(cardB, std::chrono::milliseconds(0));
   managerB.initNode(nodeA, NodeManagerType::CLIENT);
-  auto result1 = managerB.readSdoRemote<int32_t>(nodeA, sdoIndex1);
-  auto result2 = managerB.readSdoRemote<string>(nodeA, sdoIndex2);
+  auto result1 = managerB.readSdoRemote<int32_t>(nodeA, sdoIndex1, 1000);
+  auto result2 = managerB.readSdoRemote<string>(nodeA, sdoIndex2, 1000);
 
   thread bt = thread([&](){
     managerB.run();
   });
 
-
   bus->writeEmptyMsg();
 
-  int32_t readValue = result1.get().get();
-  string readStr = result2.get().get();
-  
-  SdoError error1 = SdoError(TIMEOUT);
-  SdoError error2 = SdoError(TIMEOUT);
+  auto sdoResult1 = result1.get();
+  auto sdoResult2 = result2.get();
 
-  BOOST_CHECK_EQUAL(result1.ok(), false);
-  BOOST_CHECK_EQUAL(result2.ok(), false);
+  sdoResult1.get();
+  sdoResult2.get();
 
-  BOOST_CHECK_EQUAL(result1.get().getError().string(), error1.string());
-  BOOST_CHECK_EQUAL(result2.get().getError().string(), error2.string());
-  
-  managerA.stop();
+  SdoError error1 = SdoError(SdoErrorCode::TIMEOUT);
+  SdoError error2 = SdoError(SdoErrorCode::TIMEOUT);
+
+  BOOST_CHECK_EQUAL(sdoResult1.ok(), false);
+  BOOST_CHECK_EQUAL(sdoResult2.ok(), false);
+
+  BOOST_CHECK_EQUAL(sdoResult1.getError().string(), error1.string());
+  BOOST_CHECK_EQUAL(sdoResult2.getError().string(), error2.string());
+
   managerB.stop();
 
   bus->writeEmptyMsg();
 
-  at.join();
   bt.join();
-#endif
 }
+
 BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRemoteWrite) {
   std::shared_ptr<TestBus> bus = std::make_shared<TestBus>();
   TestCard cardA(1, bus);
   TestCard cardB(2, bus);
 
-  CanOpenManager<TestCard> managerA(cardA, std::chrono::milliseconds(0));
   NodeId nodeA = 1;
-  managerA.initNode(nodeA, NodeManagerType::SERVER);
   SDOIndex sdoIndex1(0xABCD, 1);
   SDOIndex sdoIndex2(0xDDEE, 0);
-
-  managerA.writeSdoLocal<int32_t>(nodeA, sdoIndex1, 0);
-  managerA.writeSdoLocal(nodeA, sdoIndex2, "");
-
-  managerA.setSdoAccessLocal(nodeA, sdoIndex1, EntryAccess::READWRITE);
-  managerA.setSdoAccessLocal(nodeA, sdoIndex2, EntryAccess::READWRITE);
-
-  thread at = thread([&](){
-    managerA.run();
-  });
 
   int32_t value=0xAABBCCDD;
   string str = "hello world!";
@@ -111,33 +87,27 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRemoteWrite) {
   });
 
   managerB.initNode(nodeA, NodeManagerType::CLIENT);
-  auto result1 = managerB.writeSdoRemote<int32_t>(nodeA, sdoIndex1, value);
+  auto result1 = managerB.writeSdoRemote<int32_t>(nodeA, sdoIndex1, value, 1500);
 
-  SdoError error1 = SdoError(TIMEOUT);
+  SdoError error1 = SdoError(SdoErrorCode::TIMEOUT);
 
-  BOOST_CHECK_EQUAL(result1.get().ok(), false);
+  auto sdoResult1 = result1.get();
 
-  BOOST_CHECK_EQUAL(result1.get().getError().string(), error1.string());
-  
+  BOOST_CHECK_EQUAL(sdoResult1.ok(), false);
+  BOOST_CHECK_EQUAL(sdoResult1.getError().string(), error1.string());
+
   volatile bool valueReceived = false;
   managerB.writeSdoRemote<string>(nodeA, sdoIndex2, str, [&](SdoResponse<bool> res){
     BOOST_CHECK_EQUAL(res.ok(), false);
     valueReceived = true;
-  });
+  }, 1000);
 
   while(!valueReceived ) {}
-  managerA.stop();
-  managerB.stop();
 
-  // TODO: test may fail here when value is not yet completely transmitted
-  int32_t writtenValue = managerA.template readSdoLocal<int32_t>(nodeA, sdoIndex1);
-  BOOST_CHECK_EQUAL(value, writtenValue);
-  std::string writtenStr = managerA.template readSdoLocal<std::string>(nodeA, sdoIndex2);
-  BOOST_CHECK_EQUAL(str, writtenStr);
+  managerB.stop();
 
   bus->writeEmptyMsg();
 
-  at.join();
   bt.join();
 #if 0
 #endif

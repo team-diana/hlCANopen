@@ -26,21 +26,37 @@ public:
 
   void run() {
     running = true;
-    while(running) {
-      for (auto const &it : nodeManagers) {
-	it.second->updateQueue();
+
+    auto timeoutWatchdogThread = std::thread([&]() {
+      while(running) {
+        std::this_thread::sleep_for(intervalSleepTime);
+        {
+          std::unique_lock<std::mutex> lock(mutex);
+          for (auto const &it : nodeManagers) {
+            it.second->updateQueue();
+          }
+        }
       }
+    });
+
+    while(running) {
       CanMsg newMsg = card.read();
-      NodeId nodeId = newMsg.cobId.getNodeId();
-      if(nodeId == 0) {
-        // broadcast
-      } else if(nodeManagers.find(nodeId) == nodeManagers.end()) {
-        LOG(WARNING) << "Received msg with unknown node id: " << nodeId;
-      } else {
-        nodeManagers[nodeId]->newMsg(newMsg);
+      {
+//         std::lock_guard<std::mutex> managerLock(managerMutex);
+        std::unique_lock<std::mutex> lock(mutex);
+        NodeId nodeId = newMsg.cobId.getNodeId();
+        if(nodeId == 0) {
+          // broadcast
+        } else if(nodeManagers.find(nodeId) == nodeManagers.end()) {
+          LOG(WARNING) << "Received msg with unknown node id: " << nodeId;
+        } else {
+          nodeManagers[nodeId]->newMsg(newMsg);
+        }
       }
       std::this_thread::sleep_for(intervalSleepTime);
     }
+
+    timeoutWatchdogThread.join();
   }
 
 
