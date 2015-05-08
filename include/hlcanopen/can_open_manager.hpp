@@ -43,6 +43,34 @@ public:
     }
   }
 
+
+  void resetCommunication(u_int8_t nodeId)
+  {
+      sendNMT(NMT_RESET_COMMUNICATION, nodeId);
+  }
+
+  void resetNode(u_int8_t nodeId)
+  {
+      sendNMT(NMT_RESET_NODE, nodeId);
+  }
+
+  void startRemoteNode(u_int8_t nodeId)
+  {
+      sendNMT(NMT_START_REMOTE_NODE, nodeId);
+  }
+
+  void sendNMT(uint8_t command, uint8_t CANid)
+  {
+      CanMsg msg;
+
+
+      msg.cobId = COBId(0, 0);
+      msg[0] = command;
+      msg[1] = CANid;
+
+      card.write(msg);
+  }
+
   template<typename T> T readSdoLocal(NodeId nodeId, SDOIndex sdoIndex) {
     assertNodeExist(nodeId);
     std::unique_lock<std::mutex> lock(mutex);

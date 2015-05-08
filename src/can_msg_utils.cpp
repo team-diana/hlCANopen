@@ -10,13 +10,13 @@
 namespace hlcanopen {
 
 void setSdoIndex(CanMsg& msg, const SDOIndex& sdoIndex) {
-  msg[1] = sdoIndex.index >> 8;
-  msg[2] = sdoIndex.index & 0x00ff;
+  msg[1] = sdoIndex.index & 0x00ff;
+  msg[2] = sdoIndex.index >> 8;
   msg[3] = sdoIndex.subIndex;
 }
 
 SDOIndex getSdoIndex(const CanMsg& msg) {
-  unsigned int index = (unsigned int)msg[1] << 8 | msg[2];
+  unsigned int index = (unsigned int)msg[2] << 8 | msg[1];
   return SDOIndex(index, msg[3]);
 }
 
