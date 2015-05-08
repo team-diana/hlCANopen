@@ -129,6 +129,7 @@ namespace hlcanopen {
     }
 
     void writeToNodeExpedited(const SDOIndex sdoIndex, const SdoData& data) {
+      BOOST_ASSERT_MSG(data.size() <= 4, "data lenght cannot be > 4 in expedited write");
       CanMsg clientReq;
       clientReq.cobId = makeReqCobId();
       setSdoClientCommandSpecifier(clientReq, SdoClientCommandSpecifier::INITIATE_DOWNLOAD);
