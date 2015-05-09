@@ -49,12 +49,12 @@ BOOST_AUTO_TEST_CASE(PdoConfigurationTest) {
 
   PdoClient<TestCard> client(nodeId, card);
   
-  PdoConfiguration config(RPDO, 1);
+  PdoConfiguration config(TPDO, 1);
   
   COBIdPdoEntry cobId;
-  cobId.setCobId(COBId(1, 0x182));
+  cobId.setCobId(COBId(1, 0x181));
   cobId.enable29bitId(true);
-  cobId.enablePdo(false);
+  cobId.enablePdo(true);
   cobId.enableRtr(false);
   
   config.setCobId(cobId);
@@ -66,12 +66,12 @@ BOOST_AUTO_TEST_CASE(PdoConfigurationTest) {
   
   client.writeConfiguration(config);
   
-  /* 0x00 */
+  /* 0x01 - Disable the PDO configuration */
   CanMsg msg = testPipe->read();
   print_bytes(msg);
   printf("\n");
   
-  /* 0x01 */
+  /* Disable the PDO mapping */
   msg = testPipe->read();
   print_bytes(msg);
   printf("\n");
@@ -102,6 +102,11 @@ BOOST_AUTO_TEST_CASE(PdoConfigurationTest) {
   printf("\n");
   
   /* 2nd object mapped */
+  msg = testPipe->read();
+  print_bytes(msg);
+  printf("\n");
+  
+  /* Enable PDO mapping */
   msg = testPipe->read();
   print_bytes(msg);
   printf("\n");

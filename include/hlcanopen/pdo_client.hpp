@@ -57,21 +57,23 @@ namespace hlcanopen {
       }
       
       void writeConfiguration(PdoConfiguration configuration) {
-	unsigned int index = configuration.getPdoNumber();
-	const SdoData data{0, 0, 0, 0};
-	
-	sdoClient.writeToNode(SDOIndex(configuration.getPdoNumber(), 0), data);
-	
-	sdoClient.writeToNode(SDOIndex(index, COB_ID_SUB_INDEX), convertValue(configuration.getCobIdValue()));
-	
+	unsigned int index = configuration.getPdoNumber() - 1;
+	const SdoData zero_data{0, 0, 0, 0};
+
+	/* Disable the PDO configuration */
+	sdoClient.writeToNode(SDOIndex(index, COB_ID_SUB_INDEX), convertValue(0x00));
+
+	/* Disable the PDO mapping */
+	sdoClient.writeToNode(SDOIndex(index + 0x200, 0), zero_data);
+
 	sdoClient.writeToNode(SDOIndex(index, TRANSMISSION_TYPE_SUB_INDEX), convertValue(configuration.getTransmissionTypeValue()));
-	
+
 	sdoClient.writeToNode(SDOIndex(index, INHIBIT_TIME_SUB_INDEX), convertValue(configuration.getInhibitTime()));
-	
+
 	sdoClient.writeToNode(SDOIndex(index, RESERVED_SUB_INDEX), convertValue(configuration.getReserved()));
-	
+
 	sdoClient.writeToNode(SDOIndex(index, EVENT_TIMER_SUB_INDEX), convertValue(configuration.getEventTimer()));
-	
+
 	auto mapp = configuration.getMap();
 	uint8_t i = 1;
 	PDOEntry entry;
@@ -83,12 +85,15 @@ namespace hlcanopen {
 	   sdoClient.writeToNode(SDOIndex(index + 0x200, i), convertValue(it->getValue()));
 	   vect[it->position] = entry;
 	}
-	
+
 	PDOMap[configuration.getCobIdPdo()] = vect;
-	
+
 	sdoClient.writeToNode(SDOIndex(index + 0x200, 0), convertValue((uint8_t) i - 1));
+
+	/* Enable the PDO */
+	sdoClient.writeToNode(SDOIndex(index, COB_ID_SUB_INDEX), convertValue(configuration.getCobIdValue()));
       }
-      
+ 
       void receiveTPDO(CanMsg& msg) {
 	unsigned int pos;
 	for (auto entry : PDOMap(msg.cobId)) { // XXX: Is it ordered from index 0 to length()-1?
@@ -97,7 +102,7 @@ namespace hlcanopen {
 	  pos += entry.second.length;
 	}
       }
-      
+
       void writeRPDO(COBId cobId) {
 	CanMsg msg;
 	msg.cobId = cobId;
@@ -107,7 +112,7 @@ namespace hlcanopen {
 	  pos += entry.second.local_object;
 	  msg.data |= od.read(entry.second.local_object) << (64 - pos);
 	}
-	
+
 	card.write(msg);
       }
   };
