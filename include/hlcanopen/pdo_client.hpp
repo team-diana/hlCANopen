@@ -75,7 +75,8 @@ namespace hlcanopen {
 	auto mapp = configuration.getMap();
 	uint8_t i = 1;
 	PDOEntry entry;
-	std::vector<PDOEntry> vect(mapp.size());
+	int s = mapp.size() + 1; // index 0 is wasted
+	std::vector<PDOEntry> vect(s);
 	for (auto it = mapp.begin(); it != mapp.end(); it++, i++) {
 	   entry.length = it->length;
 	   entry.local_object = it->local;

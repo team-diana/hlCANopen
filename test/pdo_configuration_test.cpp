@@ -49,21 +49,22 @@ BOOST_AUTO_TEST_CASE(PdoConfigurationTest) {
 
   PdoClient<TestCard> client(nodeId, card);
   
-  PdoConfiguration conf(RPDO, 1);
+  PdoConfiguration config(RPDO, 1);
   
-  COBIdPdoEntry PdoEntry;
-  PdoEntry.setCobId(COBId(1, 0x182));
-  PdoEntry.enable29bitId(true);
-  PdoEntry.enablePdo(false);
-  PdoEntry.enableRtr(false);
+  COBIdPdoEntry cobId;
+  cobId.setCobId(COBId(1, 0x182));
+  cobId.enable29bitId(true);
+  cobId.enablePdo(false);
+  cobId.enableRtr(false);
   
-  conf.setCobId(PdoEntry);
-  conf.setTransmissionType(ASYNCHRONOUS, 1);
-  conf.setNumberOfEntries();
+  config.setCobId(cobId);
+  config.setTransmissionType(ASYNCHRONOUS, 1);
+  config.setNumberOfEntries();
   
-  conf.addMapping(SDOIndex(0x1234, 0x00), SDOIndex(0x2002, 0x00), 0x40);
+  config.addMapping(SDOIndex(0x1234, 0x00), SDOIndex(0x2002, 0x00), 0x40);
+  config.addMapping(SDOIndex(0x4321, 0x00), SDOIndex(0x8765, 0x00), 0x40);
   
-  client.writeConfiguration(conf);
+  client.writeConfiguration(config);
   
   /* 0x00 */
   CanMsg msg = testPipe->read();
@@ -100,6 +101,10 @@ BOOST_AUTO_TEST_CASE(PdoConfigurationTest) {
   print_bytes(msg);
   printf("\n");
   
+  /* 2nd object mapped */
+  msg = testPipe->read();
+  print_bytes(msg);
+  printf("\n");
   
   /* Enable PDO */
   msg = testPipe->read();
