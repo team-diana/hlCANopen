@@ -26,18 +26,37 @@ public:
 
   void run() {
     running = true;
+
+    auto timeoutWatchdogThread = std::thread([&]() {
+      while(running) {
+        std::this_thread::sleep_for(intervalSleepTime);
+        {
+          std::unique_lock<std::mutex> lock(mutex);
+          for (auto const &it : nodeManagers) {
+            it.second->updateQueue();
+          }
+        }
+      }
+    });
+
     while(running) {
       CanMsg newMsg = card.read();
-      NodeId nodeId = newMsg.cobId.getNodeId();
-      if(nodeId == 0) {
-        // broadcast
-      } else if(nodeManagers.find(nodeId) == nodeManagers.end()) {
-        LOG(WARNING) << "Received msg with unknown node id: " << nodeId;
-      } else {
-        nodeManagers[nodeId]->newMsg(newMsg);
+      {
+//         std::lock_guard<std::mutex> managerLock(managerMutex);
+        std::unique_lock<std::mutex> lock(mutex);
+        NodeId nodeId = newMsg.cobId.getNodeId();
+        if(nodeId == 0) {
+          // broadcast
+        } else if(nodeManagers.find(nodeId) == nodeManagers.end()) {
+          LOG(WARNING) << "Received msg with unknown node id: " << nodeId;
+        } else {
+          nodeManagers[nodeId]->newMsg(newMsg);
+        }
       }
       std::this_thread::sleep_for(intervalSleepTime);
     }
+
+    timeoutWatchdogThread.join();
   }
 
 
@@ -84,30 +103,34 @@ public:
     nodeManagers[nodeId]->setSdoAccessLocal(sdoIndex, access);
   }
 
-  template<typename T> std::future<SdoResponse<T>> readSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex) {
+  template<typename T> std::future<SdoResponse<T>> readSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex,
+								 long timeout = 5000) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
-    return nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex);
+    return nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex, timeout);
   }
 
   template<typename T> void readSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex,
-                                            std::function<void(SdoResponse<T>)> callback) {
+                                            std::function<void(SdoResponse<T>)> callback,
+					    long timeout = 5000) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
-    nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex, callback);
+    nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex, callback, timeout);
   }
 
-  template<typename T> std::future<SdoResponse<bool>> writeSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex, T value) {
+  template<typename T> std::future<SdoResponse<bool>> writeSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex, T value,
+								     long timeout = 5000) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
-    return nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value);
+    return nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value, timeout);
   }
 
   template<typename T> void writeSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex, T value,
-                                            std::function<void(SdoResponse<bool>)> callback) {
+                                            std::function<void(SdoResponse<bool>)> callback,
+					    long timeout = 5000) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
-    nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value, callback);
+    nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value, callback, timeout);
   }
 
 

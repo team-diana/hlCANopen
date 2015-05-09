@@ -16,6 +16,7 @@ enum SdoErrorCode {
   READ_WRITEONLY = 0x06010001,
   WRITE_READONLY = 0x06010002,
   OBJECT_NOT_IN_DICT = 0x06020000,
+  TIMEOUT = 0xff,
   // TODO add all other erros
 };
 

@@ -9,6 +9,7 @@
 #include <iostream>
 #include <functional>
 #include <map>
+#include <chrono>
 
 #define NOT_IMPLEMENTED_YET assert(false&&("NOT IMPLEMENTED YET"));
 
@@ -47,6 +48,14 @@ namespace hlcanopen {
     return get_or_create(map, key, f);
   }
 
+#if 0
+  long getTimestamp() {
+    auto ts = std::chrono::duration_cast< std::chrono::milliseconds >(
+		  std::chrono::system_clock::now().time_since_epoch())
+		  .count();
+    return ts;
+  }
+#endif
 }
 
 

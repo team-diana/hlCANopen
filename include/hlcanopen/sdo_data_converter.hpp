@@ -71,6 +71,10 @@ namespace hlcanopen {
       return data;
     }
 
+    template<> SdoData convertValue(const uint8_t& v) {
+      return convertValue<uint32_t>(v);
+    }
+
     template<> SdoData convertValue(const int32_t& v) {
       SdoData data;
       // TODO: check if same effect of uint32_t and use that code

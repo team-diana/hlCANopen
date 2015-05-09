@@ -112,6 +112,7 @@ The library is currently under development.
 - [ ] PDO support.
 - [ ] NMT support.
 - [ ] SYNC and TIMESTAMP support.
+- [x] TIMEOUT support.
 - [ ] emergency and error control. 
 
 ## Libraries Used

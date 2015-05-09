@@ -16,7 +16,7 @@ void setSdoIndex(CanMsg& msg, const SDOIndex& sdoIndex) {
 }
 
 SDOIndex getSdoIndex(const CanMsg& msg) {
-  unsigned int index = (unsigned int)msg[1] << 8 | msg[2];
+  unsigned int index = (unsigned int)msg[2] << 8 | msg[1];
   return SDOIndex(index, msg[3]);
 }
 

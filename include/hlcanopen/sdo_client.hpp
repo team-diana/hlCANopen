@@ -20,7 +20,8 @@ namespace hlcanopen {
     NO_TRANS,
     CONT,
     END_OK,
-    END_ERR
+    END_ERR,
+    END_TIMEOUT
   };
 
   enum {
@@ -85,7 +86,8 @@ namespace hlcanopen {
 
       bool transmissionIsEnded() {
         return currentTransStatus == TransStatus::END_OK ||
-               currentTransStatus == TransStatus::END_ERR;
+               currentTransStatus == TransStatus::END_ERR ||
+               currentTransStatus == TransStatus::END_TIMEOUT;
       }
 
   private:
@@ -129,13 +131,15 @@ namespace hlcanopen {
     }
 
     void writeToNodeExpedited(const SDOIndex sdoIndex, const SdoData& data) {
+      BOOST_ASSERT_MSG(data.size() <= 4, "data lenght cannot be > 4 in expedited write");
       CanMsg clientReq;
       clientReq.cobId = makeReqCobId();
       setSdoClientCommandSpecifier(clientReq, SdoClientCommandSpecifier::INITIATE_DOWNLOAD);
       setSdoExpeditedTransfer(clientReq, true);
       setSdoIndex(clientReq, sdoIndex);
       setSdoNumberOfBytesOfDataInMsgSdoClient(clientReq, data.size(),
-                                              SdoClientCommandSpecifier::INITIATE_DOWNLOAD);
+                                             SdoClientCommandSpecifier::INITIATE_DOWNLOAD);
+      setSdoSizeBit(clientReq, true);
       for(unsigned int i = 0; i < data.size(); i++) clientReq[4+i] = data[i];
 
       card.write(clientReq);

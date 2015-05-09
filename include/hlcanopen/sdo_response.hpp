@@ -16,6 +16,10 @@ public:
   sdoError(error)
   {}
 
+  SdoResponse(SdoError error = SdoError()) :
+  sdoError(error)
+  {}
+
   T get() {
     return result;
   }
