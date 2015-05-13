@@ -6,6 +6,8 @@
 #include "hlcanopen/types.hpp"
 #include "hlcanopen/sdo_data_converter.hpp"
 #include "hlcanopen/sdo_error.hpp"
+#include "hlcanopen/sdo_client_node_manager.hpp"
+#include "hlcanopen/pdo_configuration.hpp"
 #include "hlcanopen/can_msg.hpp"
 #include "hlcanopen/can_msg_utils.hpp"
 #include "hlcanopen/object_dictionary.hpp"
@@ -39,7 +41,7 @@ namespace hlcanopen {
     
       NodeId nodeId;
       C& card;
-      SdoClient<C> sdoClient{nodeId, card};
+      std::shared_ptr<SdoClientNodeManager<C>> sdoManager;
       std::unique_ptr<coroutine::push_type> sdoCoroutine;
       SdoData receivedData;
       TransStatus currentTransStatus;
@@ -49,30 +51,43 @@ namespace hlcanopen {
       std::map<COBId, std::vector<PDOEntry>> PDOMap;
 
     public:
-      PdoClient(NodeId nodeId, C& card) :
+      PdoClient(NodeId nodeId, C& card, std::shared_ptr<SdoClientNodeManager<C>> sdoM, ObjectDictionary& objDict) :
       nodeId(nodeId),
       card(card),
-      sdoClient(nodeId, card)
+      sdoManager(sdoM),
+      od(objDict)
       {
       }
       
       void writeConfiguration(PdoConfiguration configuration) {
 	unsigned int index = configuration.getPdoNumber() - 1;
 	const SdoData zero_data{0, 0, 0, 0};
+	
+	std::cout << "About to disable" << std::endl;
 
 	/* Disable the PDO configuration */
-	sdoClient.writeToNode(SDOIndex(index, COB_ID_SUB_INDEX), convertValue(0x00));
+	 std::future<SdoResponse<bool>> res = sdoManager->writeSdo(SDOIndex(index, COB_ID_SUB_INDEX), 0);
+#if 0
+	if (!res.get().ok()) {
+	  std::cout << "future not ok" << std::endl;
+	  return;
+	}
+#endif
 
 	/* Disable the PDO mapping */
-	sdoClient.writeToNode(SDOIndex(index + 0x200, 0), zero_data);
+	sdoManager->writeSdo(SDOIndex(index + 0x200, 0), 0);
 
-	sdoClient.writeToNode(SDOIndex(index, TRANSMISSION_TYPE_SUB_INDEX), convertValue(configuration.getTransmissionTypeValue()));
+	std::cout << "About to 1" << std::endl;
+	sdoManager->writeSdo(SDOIndex(index, TRANSMISSION_TYPE_SUB_INDEX), configuration.getTransmissionTypeValue());
 
-	sdoClient.writeToNode(SDOIndex(index, INHIBIT_TIME_SUB_INDEX), convertValue(configuration.getInhibitTime()));
+	std::cout << "About to 2" << std::endl;
+	sdoManager->writeSdo(SDOIndex(index, INHIBIT_TIME_SUB_INDEX), configuration.getInhibitTime());
 
-	sdoClient.writeToNode(SDOIndex(index, RESERVED_SUB_INDEX), convertValue(configuration.getReserved()));
+	std::cout << "About to 3" << std::endl;
+	sdoManager->writeSdo(SDOIndex(index, RESERVED_SUB_INDEX), configuration.getReserved());
 
-	sdoClient.writeToNode(SDOIndex(index, EVENT_TIMER_SUB_INDEX), convertValue(configuration.getEventTimer()));
+	std::cout << "About to 4" << std::endl;
+	sdoManager->writeSdo(SDOIndex(index, EVENT_TIMER_SUB_INDEX), configuration.getEventTimer());
 
 	auto mapp = configuration.getMap();
 	uint8_t i = 1;
@@ -82,16 +97,16 @@ namespace hlcanopen {
 	for (auto it = mapp.begin(); it != mapp.end(); it++, i++) {
 	   entry.length = it->length;
 	   entry.local_object = it->local;
-	   sdoClient.writeToNode(SDOIndex(index + 0x200, i), convertValue(it->getValue()));
+	   sdoManager->writeSdo(SDOIndex(index + 0x200, i), it->getValue());
 	   vect[it->position] = entry;
 	}
 
 	PDOMap[configuration.getCobIdPdo()] = vect;
 
-	sdoClient.writeToNode(SDOIndex(index + 0x200, 0), convertValue((uint8_t) i - 1));
+	sdoManager->writeSdo(SDOIndex(index + 0x200, 0), (uint8_t) i - 1);
 
 	/* Enable the PDO */
-	sdoClient.writeToNode(SDOIndex(index, COB_ID_SUB_INDEX), convertValue(configuration.getCobIdValue()));
+	sdoManager->writeSdo(SDOIndex(index, COB_ID_SUB_INDEX), configuration.getCobIdValue());
       }
  
       void receiveTPDO(CanMsg& msg) {

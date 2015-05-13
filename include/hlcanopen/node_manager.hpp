@@ -8,6 +8,8 @@
 #include "hlcanopen/object_dictionary.hpp"
 #include "hlcanopen/sdo_client_request_callback.hpp"
 #include "hlcanopen/sdo_client_request_promise.hpp"
+#include "hlcanopen/pdo_client.hpp"
+#include "hlcanopen/pdo_configuration.hpp"
 #include "hlcanopen/utils.hpp"
 #include "hlcanopen/can_msg.hpp"
 
@@ -31,9 +33,12 @@ public:
   nodeId(nodeId),
   managerType(type),
   sdoClientNodeManager(nullptr),
-  sdoServerNodeManager(nullptr) {
-    if(type == NodeManagerType::CLIENT)
-      sdoClientNodeManager = std::make_unique<SdoClientNodeManager<C>>(nodeId, card, objDict);
+  sdoServerNodeManager(nullptr),
+  pdoClient(nullptr) {
+    if(type == NodeManagerType::CLIENT) {
+      sdoClientNodeManager = std::make_shared<SdoClientNodeManager<C>>(nodeId, card, objDict);
+      pdoClient = std::make_unique<PdoClient<C>>(nodeId, card, sdoClientNodeManager, objDict);
+    }
     else
       sdoServerNodeManager = std::make_unique<SdoServerNodeManager<C>>(nodeId, card, objDict);
   }
@@ -101,6 +106,21 @@ public:
     assertType(NodeManagerType::CLIENT);
     sdoClientNodeManager->template writeSdo<T>(sdoIndex, data, callback, timeout);
   }
+
+  void writePdoConfiguration(PdoConfiguration config) {
+    assertType(NodeManagerType::CLIENT);
+    pdoClient->writeConfiguration(config);
+  }
+  
+  void writeRPDO(COBId cobId) {
+    assertType(NodeManagerType::CLIENT);
+    pdoClient->writeRPDO(cobId);
+  }
+
+  void receiveTPDO(CanMsg& m) {
+    assertType(NodeManagerType::CLIENT);
+    pdoClient->receiveTPDO(m);
+  }
   
   void updateQueue() {
     if (sdoClientNodeManager == nullptr)
@@ -118,8 +138,9 @@ private:
   NodeId nodeId;
   ObjectDictionary objDict;
   NodeManagerType managerType;
-  std::unique_ptr<SdoClientNodeManager<C>> sdoClientNodeManager;
+  std::shared_ptr<SdoClientNodeManager<C>> sdoClientNodeManager;
   std::unique_ptr<SdoServerNodeManager<C>> sdoServerNodeManager;
+  std::unique_ptr<PdoClient<C>> pdoClient;
 };
 
 }

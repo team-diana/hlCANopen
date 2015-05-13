@@ -1,6 +1,6 @@
 // Copyright (C) 2015 team-diana MIT license
 
-#define BOOST_TEST_MODULE PdoConfiguration_test
+#define BOOST_TEST_MODULE PdoClient_test
 #include <iostream>
 #include <bitset>
 
@@ -10,6 +10,7 @@
 #include "hlcanopen/sdo_data_converter.hpp"
 #include "hlcanopen/pdo_configuration.hpp"
 #include "hlcanopen/pdo_client.hpp"
+#include "hlcanopen/node_manager.hpp"
 
 #include "hlcanopen/logging/easylogging++.h"
 
@@ -41,17 +42,13 @@ void print_bytes(CanMsg msg)
 
 typedef BusLessCard<CanMsg> TestCard;
 
-#if 0
-
-BOOST_AUTO_TEST_CASE(PdoConfigurationTest) {
+BOOST_AUTO_TEST_CASE(PdoClientTest) {
   auto pipes = BiPipe<CanMsg>::make();
   TestCard card(std::get<1>(pipes));
   NodeId nodeId = 1;
   std::shared_ptr<BiPipe<CanMsg>> testPipe = std::get<0>(pipes);
 
-  ObjectDictionary od;
-  
-  PdoClient<TestCard> client(nodeId, card, od);
+  NodeManager<TestCard> manager(nodeId, card, NodeManagerType::CLIENT);
   
   PdoConfiguration config(RPDO, 1);
   
@@ -68,8 +65,12 @@ BOOST_AUTO_TEST_CASE(PdoConfigurationTest) {
   config.addMapping(SDOIndex(0x1234, 0x00), SDOIndex(0x2002, 0x00), 0x40);
 //  config.addMapping(SDOIndex(0x4321, 0x00), SDOIndex(0x8765, 0x00), 0x40);
   
-  client.writeConfiguration(config);
+  manager.writePdoConfiguration(config);
   
+  manager.writeSdoLocal<int>(SDOIndex(0x1234, 0), 1);
+  
+  manager.writeSdoRemote<int>(SDOIndex(0x1234, 0), 1);
+
   /* 0x01 - Disable the PDO configuration */
   CanMsg msg = testPipe->read();
   print_bytes(msg);
@@ -120,4 +121,3 @@ BOOST_AUTO_TEST_CASE(PdoConfigurationTest) {
   print_bytes(msg);
   printf("\n");
 }
-#endif

@@ -132,7 +132,7 @@ public:
     std::unique_lock<std::mutex> lock(mutex);
     nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value, callback, timeout);
   }
-
+  
 
   void initNode(NodeId nodeId, NodeManagerType type) {
     nodeManagers.emplace(nodeId, std::make_unique<NodeManager<C>>(nodeId, card, type));
