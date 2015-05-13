@@ -63,10 +63,8 @@ namespace hlcanopen {
 	unsigned int index = configuration.getPdoNumber() - 1;
 	const SdoData zero_data{0, 0, 0, 0};
 	
-	std::cout << "About to disable" << std::endl;
-
 	/* Disable the PDO configuration */
-	 std::future<SdoResponse<bool>> res = sdoManager->writeSdo(SDOIndex(index, COB_ID_SUB_INDEX), 0);
+	std::future<SdoResponse<bool>> res = sdoManager->writeSdo(SDOIndex(index, COB_ID_SUB_INDEX), 0);
 #if 0
 	if (!res.get().ok()) {
 	  std::cout << "future not ok" << std::endl;
@@ -77,16 +75,12 @@ namespace hlcanopen {
 	/* Disable the PDO mapping */
 	sdoManager->writeSdo(SDOIndex(index + 0x200, 0), 0);
 
-	std::cout << "About to 1" << std::endl;
 	sdoManager->writeSdo(SDOIndex(index, TRANSMISSION_TYPE_SUB_INDEX), configuration.getTransmissionTypeValue());
 
-	std::cout << "About to 2" << std::endl;
 	sdoManager->writeSdo(SDOIndex(index, INHIBIT_TIME_SUB_INDEX), configuration.getInhibitTime());
 
-	std::cout << "About to 3" << std::endl;
 	sdoManager->writeSdo(SDOIndex(index, RESERVED_SUB_INDEX), configuration.getReserved());
 
-	std::cout << "About to 4" << std::endl;
 	sdoManager->writeSdo(SDOIndex(index, EVENT_TIMER_SUB_INDEX), configuration.getEventTimer());
 
 	auto mapp = configuration.getMap();

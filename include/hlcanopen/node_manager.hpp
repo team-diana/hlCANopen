@@ -117,7 +117,7 @@ public:
     pdoClient->writeRPDO(cobId);
   }
 
-  void receiveTPDO(CanMsg& m) {
+  void receiveTPDO(CanMsg& m) { /* TODO: this should be in newMsg() */
     assertType(NodeManagerType::CLIENT);
     pdoClient->receiveTPDO(m);
   }

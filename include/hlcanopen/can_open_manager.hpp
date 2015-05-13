@@ -133,6 +133,17 @@ public:
     nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value, callback, timeout);
   }
   
+  void writePdoConfiguration(NodeId nodeId, PdoConfiguration config) {
+    initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
+    std::unique_lock<std::mutex> lock(mutex); /* XXX */
+    nodeManagers[nodeId]->writePdoConfiguration(config);
+  }
+  
+  void writeRPDO(NodeId nodeId, COBId cobId) {
+    initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
+    std::unique_lock<std::mutex> lock(mutex); /* XXX */
+    nodeManagers[nodeId]->writeRPDO(cobId);
+  }
 
   void initNode(NodeId nodeId, NodeManagerType type) {
     nodeManagers.emplace(nodeId, std::make_unique<NodeManager<C>>(nodeId, card, type));
