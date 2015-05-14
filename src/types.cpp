@@ -49,6 +49,22 @@ COBType COBId::getCobType() const
       return COBType::PDO;
   }
 }
+std::ostream& operator<< (std::ostream & os, COBType val)
+{
+    switch (val)
+    {
+        case COBType::NMT          : return os << "NMT";
+        case COBType::SYNC         : return os << "SYNC";
+        case COBType::TIMESTAMP    : return os << "TIMESTAMP";
+        case COBType::EMERGENCY    : return os << "EMERGENCY";
+        case COBType::PDO          : return os << "PDO";
+        case COBType::SDO_TRANSMIT : return os << "SDO_TRANSMIT";
+        case COBType::SDO_RECEIVE  : return os << "SDO_RECEIVE";
+        case COBType::ERROR_CONTROL: return os << "ERROR_CONTROL";
+    };
+
+    return os << "UNKNOWN VALUE : " << val << " - FIX ME - CHECK WARNINGS";
+}
 
 bool COBId::operator==(const COBId& r) const
 {

@@ -60,7 +60,8 @@ public:
         }
         break;
       default:
-        NOT_IMPLEMENTED_YET;
+        LOG(WARNING) << "NOT IMPLEMENTED COB TYPE: " << cobType;
+        //NOT_IMPLEMENTED_YET;
     }
   }
 
@@ -101,7 +102,7 @@ public:
     assertType(NodeManagerType::CLIENT);
     sdoClientNodeManager->template writeSdo<T>(sdoIndex, data, callback, timeout);
   }
-  
+
   void updateQueue() {
     if (sdoClientNodeManager == nullptr)
       std::cout << "NULL pointer" << std::endl;

@@ -19,6 +19,8 @@ namespace hlcanopen {
     NMT, SYNC, TIMESTAMP, EMERGENCY, PDO, SDO_TRANSMIT, SDO_RECEIVE, ERROR_CONTROL
   };
 
+  std::ostream& operator<< (std::ostream & os, COBType val);
+
   enum COBTypeUniqueCode {
     SDO_TRANSMIT_UNIQUE_CODE = 0b1011,
     SDO_RECEIVE_UNIQUE_CODE = 0b1100
