@@ -6,6 +6,7 @@
 #include "hlcanopen/types.hpp"
 #include "hlcanopen/node_manager.hpp"
 #include "hlcanopen/object_dictionary.hpp"
+#include "hlcanopen/pdo_configuration.hpp"
 #include "hlcanopen/utils.hpp"
 
 #include "hlcanopen/logging/easylogging++.h"
