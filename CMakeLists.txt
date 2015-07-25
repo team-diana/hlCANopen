@@ -16,7 +16,7 @@ SET(BOOST_MIN_VERSION "1.57.0")
 find_package(Boost
   ${BOOST_MIN_VERSION}
   REQUIRED
-  COMPONENTS system coroutine
+  COMPONENTS system coroutine filesystem
 )
 
 include_directories(include/)
@@ -49,3 +49,6 @@ add_test (NAME SdoCanOpenManager COMMAND SdoCanOpenManager_test)
 add_test (NAME PdoConfigurationTest COMMAND PdoConfiguration_test)
 add_test (NAME SdoCanOpenManagerTimeout COMMAND SdoCanOpenManagerTimeout_test)
 
+
+add_executable(testMain main.cpp)
+target_link_libraries(testMain hlcanopen)

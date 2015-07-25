@@ -9,6 +9,7 @@
 #include "hlcanopen/utils.hpp"
 
 #include "hlcanopen/logging/easylogging++.h"
+#include "hlcanopen/logging/logging_conf_loader.hpp"
 
 #include <chrono>
 #include <thread>
@@ -23,6 +24,14 @@ public:
   running(false),
   intervalSleepTime(sleepInterval)
   {}
+
+  void setupLogging() {
+    setupLoggingUsingConfigurationDir("logging_conf");
+  }
+
+  void setupLoggingUsingConfigurationDir(const char* dirname) {
+    loadConfigFilesFromDir(dirname);
+  }
 
   void run() {
     running = true;
@@ -78,7 +87,6 @@ public:
   void sendNMT(uint8_t command, uint8_t CANid)
   {
       CanMsg msg;
-
 
       msg.cobId = COBId(0, 0);
       msg[0] = command;
