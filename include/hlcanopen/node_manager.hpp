@@ -32,10 +32,11 @@ public:
   managerType(type),
   sdoClientNodeManager(nullptr),
   sdoServerNodeManager(nullptr) {
-    if(type == NodeManagerType::CLIENT)
+    if(type == NodeManagerType::CLIENT) {
       sdoClientNodeManager = std::make_unique<SdoClientNodeManager<C>>(nodeId, card, objDict);
-    else
+    } else {
       sdoServerNodeManager = std::make_unique<SdoServerNodeManager<C>>(nodeId, card, objDict);
+    }
   }
 
   virtual ~NodeManager() {}
@@ -60,8 +61,8 @@ public:
         }
         break;
       default:
-        LOG(WARNING) << "NOT IMPLEMENTED COB TYPE: " << cobType;
-        //NOT_IMPLEMENTED_YET;
+        CLOG(WARNING, "canopen_manager") << "NOT IMPLEMENTED COB TYPE: " << cobType;
+        CLOG(DEBUG, "canopen_manager") << "Unknown message dump: " << m;
     }
   }
 

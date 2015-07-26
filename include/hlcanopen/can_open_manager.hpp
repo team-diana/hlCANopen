@@ -51,17 +51,17 @@ public:
     while(running) {
       CanMsg newMsg = card.read();
       {
-//         std::lock_guard<std::mutex> managerLock(managerMutex);
         std::unique_lock<std::mutex> lock(mutex);
         NodeId nodeId = newMsg.cobId.getNodeId();
         if(nodeId == 0) {
           // broadcast
         } else if(nodeManagers.find(nodeId) == nodeManagers.end()) {
-          LOG(WARNING) << "Received msg with unknown node id: " << nodeId;
+          CLOG(WARNING, "canopen_manager") << "Received msg with unknown node id: " << nodeId;
         } else {
           nodeManagers[nodeId]->newMsg(newMsg);
         }
       }
+
       std::this_thread::sleep_for(intervalSleepTime);
     }
 
@@ -91,6 +91,8 @@ public:
       msg.cobId = COBId(0, 0);
       msg[0] = command;
       msg[1] = CANid;
+
+      CLOG(INFO, "canopen_manager") << "sending NMT message " << command << " to canId: " << CANid;
 
       card.write(msg);
   }
