@@ -11,6 +11,8 @@
 
 #include "boost/assert.hpp"
 
+#include <folly/futures/Future.h>
+
 #include <memory>
 #include <queue>
 #include <functional>
@@ -38,34 +40,34 @@ public:
     }
   }
 
-  template<typename T> std::future<SdoResponse<T>> readSdo(const SDOIndex& sdoIndex, long timeout = 5000) {
+  template<typename T> folly::Future<T> readSdo(const SDOIndex& sdoIndex, long timeout = 5000) {
     SdoClientReadRequestPromise<T>* request = new SdoClientReadRequestPromise<T>(sdoIndex, timeout);
-    std::future<SdoResponse<T>> future = request->getFuture();
+    folly::Future<T> future = request->getFuture();
     sdoClientRequests.push(std::unique_ptr<SdoClientReadRequestPromise<T>>(request));
     startNextSdoRequestIfPossible();
     return future;
   }
 
   template<typename T> void readSdo(const SDOIndex& sdoIndex,
-                                    std::function<void(SdoResponse<T>)> callback, long timeout = 5000) {
+                                    std::function<void(folly::Try<T>)> callback, long timeout = 5000) {
     std::unique_ptr<SdoClientRequest> request =
         std::make_unique<SdoClientReadRequestCallback<T>>(sdoIndex, callback, timeout);
     sdoClientRequests.push(std::move(request));
     startNextSdoRequestIfPossible();
   }
 
-  template<typename T> std::future<SdoResponse<bool>> writeSdo(const SDOIndex& sdoIndex, T value,
+  template<typename T> folly::Future<folly::Unit> writeSdo(const SDOIndex& sdoIndex, T value,
 							       long timeout = 5000) {
     SdoData sdoData = convertValue<T>(value);
     SdoClientWriteRequestPromise* request = new SdoClientWriteRequestPromise(sdoIndex, sdoData, timeout); /* XXX TO in promise? */
-    std::future<SdoResponse<bool>> future = request->getFuture();
+    folly::Future<folly::Unit> future = request->getFuture();
     sdoClientRequests.push(std::unique_ptr<SdoClientWriteRequest>(request));
     startNextSdoRequestIfPossible();
     return future;
   }
 
   template<typename T> void writeSdo(const SDOIndex& sdoIndex, T value,
-                                    std::function<void(SdoResponse<bool>)> callback, long timeout = 5000) {
+                                    std::function<void(folly::Try<folly::Unit>)> callback, long timeout = 5000) {
     SdoData sdoData = convertValue<T>(value);
     std::unique_ptr<SdoClientRequest> request =
         std::make_unique<SdoClientWriteRequestCallback>(sdoIndex, sdoData, callback, timeout);

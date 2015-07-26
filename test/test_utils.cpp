@@ -10,4 +10,3 @@ std::string generateString(unsigned int size) {
   }
   return s;
 }
-

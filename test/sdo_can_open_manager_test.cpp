@@ -21,6 +21,7 @@
 
 using namespace hlcanopen;
 using namespace std;
+using namespace folly;
 
 typedef Bus<CanMsg> TestBus;
 typedef Card<CanMsg> TestCard;
@@ -58,8 +59,8 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRemoteRead) {
 
   bus->writeEmptyMsg();
 
-  int32_t readValue = result1.get().get();
-  string readStr = result2.get().get();
+  int32_t readValue = result1.get();
+  string readStr = result2.get();
 
   BOOST_CHECK_EQUAL(value, readValue);
   BOOST_CHECK_EQUAL(str, readStr);
@@ -106,13 +107,13 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRemoteWrite) {
   managerB.initNode(nodeA, NodeManagerType::CLIENT);
   auto result1 = managerB.writeSdoRemote<int32_t>(nodeA, sdoIndex1, value);
 
-  bool ok = result1.get().get();
-  BOOST_CHECK_EQUAL(true, ok);
+  result1.wait();
+  BOOST_CHECK_EQUAL(true, result1.hasValue());
 
 
   volatile bool valueReceived = false;
-  managerB.writeSdoRemote<string>(nodeA, sdoIndex2, str, [&](SdoResponse<bool> res){
-    BOOST_CHECK_EQUAL(true, res.get());
+  managerB.writeSdoRemote<string>(nodeA, sdoIndex2, str, [&](Try<Unit> res){
+    BOOST_CHECK_EQUAL(true, res.hasValue());
     valueReceived = true;
   });
 

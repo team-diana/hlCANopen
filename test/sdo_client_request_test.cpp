@@ -33,7 +33,7 @@ BOOST_AUTO_TEST_CASE(SdoClientExpeditedReadTest) {
   SdoClient<TestCard> client(nodeId, card);
 
   BOOST_CHECK_EQUAL(TransStatus::NO_TRANS, client.getTransStatus());
-  BOOST_CHECK_EQUAL(true, client.getSdoError().is_no_error());
+  BOOST_CHECK_EQUAL(true, client.getSdoError().isNoError());
 
   SDOIndex sdoIndex(0xABCD, 1);
 
@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE(SdoClientSegmentedReadTest) {
 
   for(unsigned int testIter = 0; testIter < 50; testIter++) {
     BOOST_CHECK_EQUAL(TransStatus::NO_TRANS, client.getTransStatus());
-    BOOST_CHECK_EQUAL(true, client.getSdoError().is_no_error());
+    BOOST_CHECK_EQUAL(true, client.getSdoError().isNoError());
 
     string valueToRead = generateString(5+testIter);
     SDOIndex sdoIndex(0xABCD, 1);
@@ -130,7 +130,7 @@ BOOST_AUTO_TEST_CASE(SdoClientExpeditedWriteTest) {
   SdoClient<TestCard> client(nodeId, card);
 
   BOOST_CHECK_EQUAL(TransStatus::NO_TRANS, client.getTransStatus());
-  BOOST_CHECK_EQUAL(true, client.getSdoError().is_no_error());
+  BOOST_CHECK_EQUAL(true, client.getSdoError().isNoError());
 
   SDOIndex sdoIndex(0xABCD, 1);
 
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE(SdoClientSegmentedWriteTest) {
   SdoClient<TestCard> client(nodeId, card);
 
   BOOST_CHECK_EQUAL(TransStatus::NO_TRANS, client.getTransStatus());
-  BOOST_CHECK_EQUAL(true, client.getSdoError().is_no_error());
+  BOOST_CHECK_EQUAL(true, client.getSdoError().isNoError());
 
   SDOIndex sdoIndex(0xABCD, 1);
 

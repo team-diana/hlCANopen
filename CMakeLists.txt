@@ -29,7 +29,7 @@ add_library(hlcanopen SHARED
             src/logging.cpp
             src/sdo_entry_converter_visitor.cpp
           )
-target_link_libraries(hlcanopen  ${Boost_LIBRARIES})
+target_link_libraries(hlcanopen folly atomic pthread glog ${Boost_LIBRARIES})
 
 install(TARGETS hlcanopen
   LIBRARY DESTINATION lib)

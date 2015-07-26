@@ -9,6 +9,8 @@
 #include "hlcanopen/can_msg_utils.hpp"
 #include "hlcanopen/utils.hpp"
 
+#include <experimental/optional>
+
 #include <boost/coroutine/asymmetric_coroutine.hpp>
 
 #include "hlcanopen/logging/easylogging++.h"

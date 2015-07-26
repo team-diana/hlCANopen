@@ -11,6 +11,8 @@
 #include "hlcanopen/logging/easylogging++.h"
 #include "hlcanopen/logging/logging_conf_loader.hpp"
 
+#include <folly/futures/Future.h>
+
 #include <chrono>
 #include <thread>
 #include <mutex>
@@ -24,6 +26,8 @@ public:
   running(false),
   intervalSleepTime(sleepInterval)
   {}
+
+  virtual ~CanOpenManager() {}
 
   void setupLogging() {
     setupLoggingUsingConfigurationDir("logging_conf");
@@ -113,7 +117,7 @@ public:
     nodeManagers[nodeId]->setSdoAccessLocal(sdoIndex, access);
   }
 
-  template<typename T> std::future<SdoResponse<T>> readSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex,
+  template<typename T> folly::Future<T> readSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex,
 								 long timeout = 5000) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
@@ -121,14 +125,14 @@ public:
   }
 
   template<typename T> void readSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex,
-                                            std::function<void(SdoResponse<T>)> callback,
+                                            std::function<void(folly::Try<T>)> callback,
 					    long timeout = 5000) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
     nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex, callback, timeout);
   }
 
-  template<typename T> std::future<SdoResponse<bool>> writeSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex, T value,
+  template<typename T> folly::Future<folly::Unit> writeSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex, T value,
 								     long timeout = 5000) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
@@ -136,7 +140,7 @@ public:
   }
 
   template<typename T> void writeSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex, T value,
-                                            std::function<void(SdoResponse<bool>)> callback,
+                                            std::function<void(folly::Try<folly::Unit>)> callback,
 					    long timeout = 5000) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);

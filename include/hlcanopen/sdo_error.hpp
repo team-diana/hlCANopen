@@ -8,7 +8,7 @@
 namespace hlcanopen {
 
 enum SdoErrorCode {
-  NO_ERROR = 0,
+  NO_ERROR = 0x0,
   TOGGLE_BIT_NOT_ALTERNATED = 0x05030000,
   INVALID_UNKNOWN_COMMAND_SPEC = 0x05040001,
   OUT_OF_MEMORY = 0x05040005,
@@ -17,16 +17,18 @@ enum SdoErrorCode {
   WRITE_READONLY = 0x06010002,
   OBJECT_NOT_IN_DICT = 0x06020000,
   TIMEOUT = 0xff,
-  // TODO add all other erros
+  // TODO add all other errors
 };
 
-class SdoError {
+class SdoError : public std::exception {
+
 public:
-  SdoError(SdoErrorCode errorCode = SdoErrorCode::NO_ERROR);
-  std::string string();
-  // Returns true if there is no actual error.
-  // TODO: use Algebric Data Type like: ok|error
-  bool is_no_error();
+  explicit SdoError();
+  SdoError(SdoErrorCode errorCode);
+
+  virtual const char* what() const noexcept override;
+
+  bool isNoError();
 
 private:
   SdoErrorCode errorCode;
