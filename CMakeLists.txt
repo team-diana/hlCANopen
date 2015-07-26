@@ -16,7 +16,7 @@ SET(BOOST_MIN_VERSION "1.57.0")
 find_package(Boost
   ${BOOST_MIN_VERSION}
   REQUIRED
-  COMPONENTS system coroutine
+  COMPONENTS system coroutine filesystem
 )
 
 include_directories(include/)
@@ -28,8 +28,9 @@ add_library(hlcanopen SHARED
             src/can_msg_utils.cpp
             src/logging.cpp
             src/sdo_entry_converter_visitor.cpp
+            src/executor/unique_thread_executor.cpp
           )
-target_link_libraries(hlcanopen  ${Boost_LIBRARIES})
+target_link_libraries(hlcanopen folly atomic pthread glog ${Boost_LIBRARIES})
 
 install(TARGETS hlcanopen
   LIBRARY DESTINATION lib)
@@ -49,3 +50,6 @@ add_test (NAME SdoCanOpenManager COMMAND SdoCanOpenManager_test)
 add_test (NAME PdoConfigurationTest COMMAND PdoConfiguration_test)
 add_test (NAME SdoCanOpenManagerTimeout COMMAND SdoCanOpenManagerTimeout_test)
 
+
+add_executable(testMain main.cpp)
+target_link_libraries(testMain hlcanopen)

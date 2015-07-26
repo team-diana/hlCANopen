@@ -21,6 +21,7 @@
 
 using namespace hlcanopen;
 using namespace std;
+using namespace folly;
 
 typedef Bus<CanMsg> TestBus;
 typedef Card<CanMsg> TestCard;
@@ -46,20 +47,18 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerTimeoutRemoteRead) {
 
   bus->writeEmptyMsg();
 
-  auto sdoResult1 = result1.get();
-  auto sdoResult2 = result2.get();
-
-  sdoResult1.get();
-  sdoResult2.get();
+  result1.wait();
+  result2.wait();
 
   SdoError error1 = SdoError(SdoErrorCode::TIMEOUT);
   SdoError error2 = SdoError(SdoErrorCode::TIMEOUT);
 
-  BOOST_CHECK_EQUAL(sdoResult1.ok(), false);
-  BOOST_CHECK_EQUAL(sdoResult2.ok(), false);
 
-  BOOST_CHECK_EQUAL(sdoResult1.getError().string(), error1.string());
-  BOOST_CHECK_EQUAL(sdoResult2.getError().string(), error2.string());
+  BOOST_CHECK_EQUAL(result1.hasValue(), false);
+  BOOST_CHECK_EQUAL(result2.hasValue(), false);
+
+  BOOST_CHECK_EQUAL(getSdoError(result1).what(), error1.what());
+  BOOST_CHECK_EQUAL(getSdoError(result2).what(), error2.what());
 
   managerB.stop();
 
@@ -91,14 +90,14 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRemoteWrite) {
 
   SdoError error1 = SdoError(SdoErrorCode::TIMEOUT);
 
-  auto sdoResult1 = result1.get();
+  result1.wait();
 
-  BOOST_CHECK_EQUAL(sdoResult1.ok(), false);
-  BOOST_CHECK_EQUAL(sdoResult1.getError().string(), error1.string());
+  BOOST_CHECK_EQUAL(result1.hasValue(), false);
+  BOOST_CHECK_EQUAL(getSdoError(result1).what(), error1.what());
 
   volatile bool valueReceived = false;
-  managerB.writeSdoRemote<string>(nodeA, sdoIndex2, str, [&](SdoResponse<bool> res){
-    BOOST_CHECK_EQUAL(res.ok(), false);
+  managerB.writeSdoRemote<string>(nodeA, sdoIndex2, str, [&](Try<Unit> res){
+    BOOST_CHECK_EQUAL(res.hasValue(), false);
     valueReceived = true;
   }, 1000);
 

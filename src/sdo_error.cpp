@@ -4,13 +4,20 @@
 #include "hlcanopen/utils.hpp"
 
 namespace hlcanopen {
+
+SdoError::SdoError() : errorCode(NO_ERROR)
+{
+
+}
+
+
 SdoError::SdoError(SdoErrorCode errorCode) :
 errorCode(errorCode)
 {
 
 }
 
-std::string SdoError::string()
+const char* SdoError::what() const noexcept
 {
   switch(errorCode) {
     case NO_ERROR: return "NO_ERROR"; break;
@@ -22,15 +29,14 @@ std::string SdoError::string()
     case WRITE_READONLY : return "WRITE_READONLY "; break;
     case OBJECT_NOT_IN_DICT : return "OBJECT_NOT_IN_DICT "; break;
     case TIMEOUT : return "TIMEOUT "; break;
-    default: return "";
+    default: return "UNKNOWN ERROR CODE";
   }
 }
 
-bool SdoError::is_no_error()
+bool SdoError::isNoError()
 {
-  return errorCode == SdoErrorCode::NO_ERROR;
+  return errorCode == NO_ERROR;
 }
-
 
 }
 

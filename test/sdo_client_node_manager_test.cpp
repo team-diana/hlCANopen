@@ -11,15 +11,19 @@
 #include "cansim/bi_pipe.hpp"
 #include "cansim/bus_less_card.hpp"
 
+#include <folly/futures/Future.h>
+
 #include "boost/test/unit_test.hpp"
 
 #include <iostream>
 #include <thread>
 
+
 #include "hlcanopen/logging/easylogging++.h"
 
 using namespace std;
 using namespace hlcanopen;
+using namespace folly;
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TransStatus);
 
@@ -60,12 +64,14 @@ BOOST_AUTO_TEST_CASE(SdoClientNodeManagerReadFutureTest) {
     }
   );
 
-  SdoResponse<int32_t> sdoResponse = response.get();
+  response.wait();
+  Try<int32_t> sdoResponse = response.getTry();
   managerThread.join();
   otherDeviceThread.join();
 
-  BOOST_CHECK_EQUAL(true, sdoResponse.ok());
-  BOOST_CHECK_EQUAL(valueToBeRead, sdoResponse.get());
+
+  BOOST_CHECK_EQUAL(true, sdoResponse.hasValue());
+  BOOST_CHECK_EQUAL(valueToBeRead, sdoResponse.value());
 }
 
 BOOST_AUTO_TEST_CASE(SdoClientNodeManagerReadCallbackTest) {
@@ -80,9 +86,9 @@ BOOST_AUTO_TEST_CASE(SdoClientNodeManagerReadCallbackTest) {
   SDOIndex sdoIndex(0xAABB, 1);
   uint32_t valueToBeRead=0xCAFECAFE;
 
-  nodeManager.readSdo<int32_t>(sdoIndex, [&](SdoResponse<int32_t> sdoResponse) {
-    BOOST_CHECK_EQUAL(true, sdoResponse.ok());
-    BOOST_CHECK_EQUAL(valueToBeRead, sdoResponse.get());
+  nodeManager.readSdo<int32_t>(sdoIndex, [&](Try<int32_t> sdoResponse) {
+    BOOST_CHECK_EQUAL(true, sdoResponse.hasValue());
+    BOOST_CHECK_EQUAL(valueToBeRead, sdoResponse.value());
     stopThread = true;
   });
 
@@ -148,12 +154,11 @@ BOOST_AUTO_TEST_CASE(SdoClientNodeManagerWriteFutureTest) {
     }
   );
 
-  SdoResponse<bool> sdoResponse = response.get();
   managerThread.join();
   otherDeviceThread.join();
 
-  BOOST_CHECK_EQUAL(true, sdoResponse.get());
-  BOOST_CHECK_EQUAL(true, sdoResponse.ok());
+  response.wait();
+  BOOST_CHECK_EQUAL(true, response.hasValue());
 }
 
 BOOST_AUTO_TEST_CASE(SdoClientNodeManagerWriteCallbackTest) {
@@ -167,9 +172,8 @@ BOOST_AUTO_TEST_CASE(SdoClientNodeManagerWriteCallbackTest) {
   SDOIndex sdoIndex(0xAABB, 0);
   int32_t valueToWrite=0xAABBCCDD;
 
-  nodeManager.writeSdo(sdoIndex, valueToWrite, [&](SdoResponse<bool> result) {
-    BOOST_CHECK_EQUAL(true, result.get());
-    BOOST_CHECK_EQUAL(true, result.ok());
+  nodeManager.writeSdo(sdoIndex, valueToWrite, [&](Try<Unit> result) {
+    BOOST_CHECK_EQUAL(true, result.hasValue());
   });
 
   std::thread managerThread(

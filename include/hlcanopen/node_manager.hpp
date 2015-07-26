@@ -13,6 +13,8 @@
 
 #include "boost/assert.hpp"
 
+#include <folly/futures/Future.h>
+
 #include <memory>
 #include <queue>
 #include <functional>
@@ -32,10 +34,11 @@ public:
   managerType(type),
   sdoClientNodeManager(nullptr),
   sdoServerNodeManager(nullptr) {
-    if(type == NodeManagerType::CLIENT)
+    if(type == NodeManagerType::CLIENT) {
       sdoClientNodeManager = std::make_unique<SdoClientNodeManager<C>>(nodeId, card, objDict);
-    else
+    } else {
       sdoServerNodeManager = std::make_unique<SdoServerNodeManager<C>>(nodeId, card, objDict);
+    }
   }
 
   virtual ~NodeManager() {}
@@ -60,8 +63,8 @@ public:
         }
         break;
       default:
-        LOG(WARNING) << "NOT IMPLEMENTED COB TYPE: " << cobType;
-        //NOT_IMPLEMENTED_YET;
+        CLOG(WARNING, "canopen_manager") << "NOT IMPLEMENTED COB TYPE: " << cobType;
+        CLOG(DEBUG, "canopen_manager") << "Unknown message dump: " << m;
     }
   }
 
@@ -79,34 +82,37 @@ public:
     objDict.setAccess(sdoIndex, access);
   }
 
-  template<typename T> std::future<SdoResponse<T>> readSdoRemote(const SDOIndex& sdoIndex, long timeout = 5000) {
+  template<typename T> folly::Future<T> readSdoRemote(const SDOIndex& sdoIndex, long timeout = 5000) {
     assertType(NodeManagerType::CLIENT);
     return sdoClientNodeManager->template readSdo<T>(sdoIndex, timeout);
   }
 
   template<typename T> void readSdoRemote(const SDOIndex& sdoIndex,
-                                            std::function<void(SdoResponse<T>)> callback, long timeout = 5000) {
+                                            std::function<void(folly::Try<T>)> callback, long timeout = 5000) {
     assertType(NodeManagerType::CLIENT);
     return sdoClientNodeManager->template readSdo<T>(sdoIndex, callback, timeout);
   }
 
-  template<typename T> std::future<SdoResponse<bool>> writeSdoRemote(const SDOIndex& sdoIndex, T data,
+  template<typename T> folly::Future<folly::Unit> writeSdoRemote(const SDOIndex& sdoIndex, T data,
 								     long timeout = 5000) {
     assertType(NodeManagerType::CLIENT);
     return sdoClientNodeManager->template writeSdo<T>(sdoIndex, data, timeout);
   }
 
   template<typename T> void writeSdoRemote(const SDOIndex& sdoIndex, T data,
-                                            std::function<void(SdoResponse<bool>)> callback,
+                                            std::function<void(folly::Try<folly::Unit>)> callback,
 					    long timeout = 5000) {
     assertType(NodeManagerType::CLIENT);
     sdoClientNodeManager->template writeSdo<T>(sdoIndex, data, callback, timeout);
   }
 
   void updateQueue() {
-    if (sdoClientNodeManager == nullptr)
-      std::cout << "NULL pointer" << std::endl;
-    else sdoClientNodeManager->updateQueue();
+//     if (sdoClientNodeManager == nullptr)
+//       std::cout << "NULL pointer" << std::endl;
+//     else sdoClientNodeManager->updateQueue();
+    if (sdoClientNodeManager != nullptr) {
+      sdoClientNodeManager->updateQueue();
+    }
   }
 
 private:

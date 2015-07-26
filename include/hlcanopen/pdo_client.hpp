@@ -11,12 +11,15 @@
 #include "hlcanopen/object_dictionary.hpp"
 #include "hlcanopen/utils.hpp"
 
+
 #include <boost/coroutine/asymmetric_coroutine.hpp>
 
 #include "logging/easylogging++.h"
 
+#include <experimental/optional>
+
 namespace hlcanopen {
-  
+
   enum CommunicationParamSubIndex {
     NUMBER_OF_ENTRIES_SUB_INDEX = 0,
     COB_ID_SUB_INDEX = 1,
@@ -25,27 +28,27 @@ namespace hlcanopen {
     RESERVED_SUB_INDEX = 4,
     EVENT_TIMER_SUB_INDEX = 5
   };
-  
+
   struct PDOEntry {
     PDOEntry() {};
     uint8_t length; // Useless for RPDO, but we use the same struct
 		    // to have a single PDOMap
     SDOIndex local_object;
   };
-    
+
 
   template<class C> class PdoClient {
     typedef boost::coroutines::asymmetric_coroutine<CanMsg> coroutine;
-    
+
       NodeId nodeId;
       C& card;
       SdoClient<C> sdoClient{nodeId, card};
       std::unique_ptr<coroutine::push_type> sdoCoroutine;
       SdoData receivedData;
       TransStatus currentTransStatus;
-      SdoError currentSdoError;
+//       std::optional<SdoError> currentSdoError;
       ObjectDictionary od;
-      
+
       std::map<COBId, std::vector<PDOEntry>> PDOMap;
 
     public:
@@ -55,7 +58,7 @@ namespace hlcanopen {
       sdoClient(nodeId, card)
       {
       }
-      
+
       void writeConfiguration(PdoConfiguration configuration) {
 	unsigned int index = configuration.getPdoNumber() - 1;
 	const SdoData zero_data{0, 0, 0, 0};
@@ -93,7 +96,7 @@ namespace hlcanopen {
 	/* Enable the PDO */
 	sdoClient.writeToNode(SDOIndex(index, COB_ID_SUB_INDEX), convertValue(configuration.getCobIdValue()));
       }
- 
+
       void receiveTPDO(CanMsg& msg) {
 	unsigned int pos;
 	for (auto entry : PDOMap(msg.cobId)) { // XXX: Is it ordered from index 0 to length()-1?

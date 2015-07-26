@@ -6,9 +6,10 @@
 // #include <boost/variant.hpp>
 
 #include "hlcanopen/sdo_client_request.hpp"
-#include "hlcanopen/sdo_response.hpp"
 #include "hlcanopen/types.hpp"
 #include "hlcanopen/sdo_data_converter.hpp"
+
+#include <folly/futures/Future.h>
 
 #include <thread>
 #include <future>
@@ -27,24 +28,24 @@ public:
   virtual ~SdoClientReadRequestPromise() {}
 
   void completeRequest(const SdoData& data) override {
-    promise.set_value(SdoResponse<T>(convertSdoData<T>(data)));
+    promise.setValue(convertSdoData<T>(data));
   }
 
   void completeRequestWithFail(const SdoError& error) override {
-    promise.set_value(SdoResponse<T>(error));
+    promise.setException(error);
   }
 
-  void completeRequestWithTimeout() override { /* XXX */
+  void completeRequestWithTimeout() override {
     const SdoError error(SdoErrorCode::TIMEOUT);
-    promise.set_value(SdoResponse<T>(error));
+    promise.setException(error);
   }
 
-  std::future<SdoResponse<T>> getFuture() {
-    return promise.get_future();
+  folly::Future<T> getFuture() {
+    return promise.getFuture();
   }
 
 private:
-  std::promise<SdoResponse<T>> promise;
+  folly::Promise<T> promise;
 };
 
 class SdoClientWriteRequestPromise : public SdoClientWriteRequest {
@@ -55,24 +56,24 @@ public:
   virtual ~SdoClientWriteRequestPromise() {}
 
   void completeRequest() override {
-    promise.set_value(SdoResponse<bool>(true));
+    promise.setValue();
   }
 
   void completeRequestWithFail(const SdoError& error) override {
-    promise.set_value(SdoResponse<bool>(true, error));
+    promise.setException(error);
   }
 
   void completeRequestWithTimeout() override {
     const SdoError error = SdoError(SdoErrorCode::TIMEOUT);
-    promise.set_value(SdoResponse<bool>(false, error)); /* XXX */
+    promise.setException(error);
   }
 
-  std::future<SdoResponse<bool>> getFuture() {
-    return promise.get_future();
+  folly::Future<folly::Unit> getFuture() {
+    return promise.getFuture();
   }
 
 private:
-  std::promise<SdoResponse<bool>> promise;
+  folly::Promise<folly::Unit> promise;
 };
 
 }
