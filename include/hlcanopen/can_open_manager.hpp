@@ -37,6 +37,10 @@ public:
     loadConfigFilesFromDir(dirname);
   }
 
+  void setDefaultFutureExecutor(std::shared_ptr<folly::Executor> ex) {
+    executor = ex;
+  }
+
   void run() {
     running = true;
 
@@ -121,7 +125,8 @@ public:
 								 long timeout = 5000) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
-    return nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex, timeout);
+    folly::Future<T> fut = nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex, timeout);
+    return addExecutorIfAny(std::move(fut));
   }
 
   template<typename T> void readSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex,
@@ -136,7 +141,8 @@ public:
 								     long timeout = 5000) {
     initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
     std::unique_lock<std::mutex> lock(mutex);
-    return nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value, timeout);
+    folly::Future<folly::Unit> fut =  nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value, timeout);
+    return addExecutorIfAny(std::move(fut));
   }
 
   template<typename T> void writeSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex, T value,
@@ -166,6 +172,14 @@ private:
     nodeManagers.emplace(nodeId, std::make_unique<NodeManager<C>>(nodeId, card, type));
   }
 
+  template<typename T> folly::Future<T> addExecutorIfAny(folly::Future<T>&& fut) {
+    if(executor) {
+      return fut.via(executor.get());
+    } else {
+      return std::move(fut);
+    }
+  }
+
 
 private:
   std::map<NodeId, std::unique_ptr<NodeManager<C>>> nodeManagers;
@@ -173,6 +187,7 @@ private:
   bool running;
   std::chrono::milliseconds intervalSleepTime;
   std::mutex mutex;
+  std::shared_ptr<folly::Executor> executor;
 };
 }
 

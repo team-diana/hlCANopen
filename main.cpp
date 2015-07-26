@@ -4,7 +4,7 @@ using namespace hlcanopen;
 
 template <typename T> class Fake {
 public:
-  template<class M> void write(M&& msg) {
+  template<class M> void write(M&& ) {
   }
 
   T read() {

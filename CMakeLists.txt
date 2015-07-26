@@ -28,6 +28,7 @@ add_library(hlcanopen SHARED
             src/can_msg_utils.cpp
             src/logging.cpp
             src/sdo_entry_converter_visitor.cpp
+            src/executor/unique_thread_executor.cpp
           )
 target_link_libraries(hlcanopen folly atomic pthread glog ${Boost_LIBRARIES})
 

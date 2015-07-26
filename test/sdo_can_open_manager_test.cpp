@@ -7,6 +7,7 @@
 #include "hlcanopen/can_msg.hpp"
 #include "hlcanopen/types.hpp"
 #include "hlcanopen/sdo_data_converter.hpp"
+#include "hlcanopen/executor/unique_thread_executor.hpp"
 
 #include "test_utils.hpp"
 
@@ -126,6 +127,51 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRemoteWrite) {
   BOOST_CHECK_EQUAL(value, writtenValue);
   std::string writtenStr = managerA.template readSdoLocal<std::string>(nodeA, sdoIndex2);
   BOOST_CHECK_EQUAL(str, writtenStr);
+
+  bus->writeEmptyMsg();
+
+  at.join();
+  bt.join();
+}
+
+BOOST_AUTO_TEST_CASE(SdoCanOpenManagerUniqueThreadExecutor) {
+  std::shared_ptr<TestBus> bus = std::make_shared<TestBus>();
+  TestCard cardA(1, bus);
+  TestCard cardB(2, bus);
+
+  CanOpenManager<TestCard> managerA(cardA, std::chrono::milliseconds(0));
+  NodeId nodeA = 1;
+  managerA.initNode(nodeA, NodeManagerType::SERVER);
+  SDOIndex sdoIndex1(0xABCD, 1);
+
+  int32_t value=0xAABBCCDD;
+
+  auto uniqueThreadExecutor = std::make_shared<UniqueThreadExecutor>();
+
+  managerA.setDefaultFutureExecutor(uniqueThreadExecutor);
+  managerA.writeSdoLocal(nodeA, sdoIndex1, value);
+
+  thread at = thread([&](){
+    managerA.run();
+  });
+
+  CanOpenManager<TestCard> managerB(cardB, std::chrono::milliseconds(0));
+  managerB.initNode(nodeA, NodeManagerType::CLIENT);
+  auto result1 = managerB.readSdoRemote<int32_t>(nodeA, sdoIndex1);
+
+  thread bt = thread([&](){
+    managerB.run();
+  });
+
+
+  bus->writeEmptyMsg();
+
+  int32_t readValue = result1.get();
+
+  BOOST_CHECK_EQUAL(value, readValue);
+
+  managerA.stop();
+  managerB.stop();
 
   bus->writeEmptyMsg();
 
