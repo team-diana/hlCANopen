@@ -5,7 +5,7 @@
 
 #include <boost/filesystem.hpp>
 
-#include "logging/easylogging++.h"
+#include "hlcanopen/logging/easylogging++.h"
 
 #include <iostream>
 

@@ -4,8 +4,10 @@
 #define OCO_CAN_MSG_HPP
 
 #include "types.hpp"
+#include "utils.hpp"
 
 #include <sstream>
+#include <iomanip>
 
 namespace hlcanopen {
 
@@ -32,10 +34,11 @@ struct CanMsg {
 
   std::string msgDataToStr() const {
     std::ostringstream os;
+    os << "<";
     for(int i=0; i < 7; i++) {
-      os << (*this)[i] << ":";
+      os << hexUppercase << static_cast<uint32_t>((*this)[i]) << ":";
     }
-    os << (*this)[7];
+    os << hexUppercase << static_cast<uint32_t>((*this)[7]) << ">";
     return os.str();
   }
 
@@ -49,8 +52,12 @@ private:
 
   std::ostream& operator<<(std::ostream& os, const CanMsg& msg)
   {
-      os << "CanMsg[" << "cobId:" << std::hex << msg.cobId.getCobIdValue()
+      std::ios::fmtflags f( os.flags() );
+      os << "CanMsg[" << "cobId:" << std::hex
+        << std::setfill('0') << std::uppercase
+        << std::setw(2) << msg.cobId.getCobIdValue()
          << ", data:" << msg.msgDataToStr() << "]";
+      os.flags(f);
       return os;
   }
 

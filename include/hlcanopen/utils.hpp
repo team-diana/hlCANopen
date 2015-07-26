@@ -10,6 +10,7 @@
 #include <functional>
 #include <map>
 #include <chrono>
+#include <iomanip>
 
 #define NOT_IMPLEMENTED_YET assert(false&&("NOT IMPLEMENTED YET"));
 
@@ -46,6 +47,12 @@ namespace hlcanopen {
   get_or_create(std::map<K, V>& map, const K& key) {
     std::function<V()> f = []{return V();};
     return get_or_create(map, key, f);
+  }
+
+  static std::ostream& hexUppercase(std::ostream& out) {
+    return out << std::hex << std::setfill('0')
+        << std::uppercase
+        << std::setw(2);
   }
 
 #if 0

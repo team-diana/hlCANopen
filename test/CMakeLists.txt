@@ -23,11 +23,12 @@ function(add_canopen_test TestName files)
                         hlcanopen
                         TestUtils
                         ${Boost_LIBRARIES}
-                        ${CMAKE_THREAD_LIBS_INIT} 
+                        ${CMAKE_THREAD_LIBS_INIT}
                         )
 endfunction(add_canopen_test)
 
 add_canopen_test(Cansim_test "cansim_test.cpp")
+add_canopen_test(CanMsg "can_msg_test.cpp")
 add_canopen_test(SdoClientRequest_test "sdo_client_request_test.cpp")
 add_canopen_test(SdoServerRequest_test "sdo_server_request_test.cpp")
 add_canopen_test(SdoClientNodeManager_test "sdo_client_node_manager_test.cpp")

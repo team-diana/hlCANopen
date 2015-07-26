@@ -27,19 +27,11 @@ using namespace hlcanopen;
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TransStatus);
 
-void print_bytes(CanMsg msg)
-{
-  size_t i;
-
-  printf("[ ");
-  for(i = 0; i < 8; i++)
-  {
-    printf("%02x ", msg[i]);
-  }
-  printf("]\n");
-}
-
 typedef BusLessCard<CanMsg> TestCard;
+
+void print_bytes(const CanMsg& msg) {
+  std::cout << msg << std::endl;
+}
 
 BOOST_AUTO_TEST_CASE(PdoConfigurationTest) {
   auto pipes = BiPipe<CanMsg>::make();
@@ -48,69 +40,69 @@ BOOST_AUTO_TEST_CASE(PdoConfigurationTest) {
   std::shared_ptr<BiPipe<CanMsg>> testPipe = std::get<0>(pipes);
 
   PdoClient<TestCard> client(nodeId, card);
-  
+
   PdoConfiguration config(TPDO, 1);
-  
+
   COBIdPdoEntry cobId;
   cobId.setCobId(COBId(1, 0x181));
   cobId.enable29bitId(true);
   cobId.enablePdo(true);
   cobId.enableRtr(false);
-  
+
   config.setCobId(cobId);
   config.setTransmissionType(ASYNCHRONOUS, 1);
   config.setNumberOfEntries();
-  
+
   config.addMapping(SDOIndex(0x1234, 0x00), SDOIndex(0x2002, 0x00), 0x40);
   config.addMapping(SDOIndex(0x4321, 0x00), SDOIndex(0x8765, 0x00), 0x40);
-  
+
   client.writeConfiguration(config);
-  
+
   /* 0x01 - Disable the PDO configuration */
   CanMsg msg = testPipe->read();
   print_bytes(msg);
   printf("\n");
-  
+
   /* Disable the PDO mapping */
   msg = testPipe->read();
   print_bytes(msg);
   printf("\n");
-  
+
   /* 0x02 */
   msg = testPipe->read();
   print_bytes(msg);
   printf("\n");
-  
+
   /* 0x03 */
   msg = testPipe->read();
   print_bytes(msg);
   printf("\n");
-  
+
   /* 0x04 */
   msg = testPipe->read();
   print_bytes(msg);
   printf("\n");
-  
+
   /* 0x05 */
   msg = testPipe->read();
   print_bytes(msg);
   printf("\n");
-  
+
   /* 1st object mapped */
   msg = testPipe->read();
   print_bytes(msg);
   printf("\n");
-  
+
   /* 2nd object mapped */
   msg = testPipe->read();
   print_bytes(msg);
   printf("\n");
-  
+
   /* Enable PDO mapping */
   msg = testPipe->read();
   print_bytes(msg);
   printf("\n");
-  
+
   /* Enable PDO */
   msg = testPipe->read();
   print_bytes(msg);
