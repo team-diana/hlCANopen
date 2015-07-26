@@ -7,6 +7,11 @@
 The library provides a generic and async interface, making its usage simpler
 in comparision to other libraries.
 
+## Dependencies
+
+- [Boost](www.boost.org)
+- [Folly](https://github.com/facebook/folly)
+
 ## Examples
 
 ```c++
