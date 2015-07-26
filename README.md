@@ -123,4 +123,3 @@ The library is currently under development.
 ## Libraries Used
 - Boost www.boost.org
 - easyloggingcpp https://github.com/easylogging/easyloggingpp
-- Optional https://github.com/akrzemi1/Optional (to be replaced once std::optional will be standard)
