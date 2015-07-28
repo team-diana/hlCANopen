@@ -20,6 +20,10 @@ enum TransmissionType {
     ASYNCHRONOUS
 };
 
+enum {
+    MAX_MAPPING_LENGTH = 64
+};
+
 typedef uint16_t EventTimer;
 
 struct MappingEntry {
@@ -59,7 +63,7 @@ public:
         cobId = c;
     }
 
-    COBId getCobId() {
+    COBId getCobId() const {
         return cobId;
     }
 
@@ -67,7 +71,7 @@ public:
         use29BitId = b;
     }
 
-    bool is29bitId() {
+    bool is29bitId() const {
         return use29BitId;
     }
 
@@ -75,7 +79,7 @@ public:
         disableRtr = !b;
     }
 
-    bool isRtrEnabled() {
+    bool isRtrEnabled() const {
         return !disableRtr;
     }
 
@@ -83,11 +87,11 @@ public:
         disablePdo = !b;
     }
 
-    bool isPdoEnabled() {
+    bool isPdoEnabled() const {
         return !disablePdo;
     }
 
-    uint32_t getData() { // What about the bit order?
+    uint32_t getData() const {
         uint8_t data = 0x00;
         if (disablePdo)
             data |= (1 << 31);
@@ -96,8 +100,9 @@ public:
         if (use29BitId) {
             data |= (1 << 29);
             data |= (cobId.getCobIdValue() & 0b00011111111111111111111111111);
+        } else {
+            data |= (cobId.getCobIdValue() & 0b00000000000000000011111111111);
         }
-        data |= (cobId.getCobIdValue() & 0b00000000000000000000011111111);
 
         return data;
     }
@@ -121,7 +126,7 @@ public:
     {
     }
 
-    unsigned int getPdoNumber() {
+    unsigned int getPdoNumber() const {
         return numberOfPdo;
     }
 
@@ -144,7 +149,7 @@ public:
         numberOfEntries = number;
     }
 
-    uint8_t getNumberOfEntries() {
+    uint8_t getNumberOfEntries() const {
         return numberOfEntries;
     }
 
@@ -152,15 +157,15 @@ public:
         cobId = c;
     }
 
-    COBIdPdoEntry getCobId() {
+    COBIdPdoEntry getCobId() const {
         return cobId;
     }
 
-    COBId getCobIdPdo() {
+    COBId getCobIdPdo() const {
         return cobId.getCobId();
     }
 
-    uint32_t getCobIdValue() {
+    uint32_t getCobIdValue() const {
         return cobId.getData();
     }
 
@@ -185,7 +190,7 @@ public:
         }
     }
 
-    TransmissionType getTransmissionType() {
+    TransmissionType getTransmissionType() const {
         if (transType < 0xFC)
             return SYNCHRONOUS_CYCLIC;
         if (transType == 0xFC)
@@ -196,11 +201,11 @@ public:
             return ASYNCHRONOUS;
     }
 
-    uint8_t getTransmissionTypeValue() {
+    uint8_t getTransmissionTypeValue() const {
         return transType;
     }
 
-    unsigned int getSynchronousCyclicInterval() {
+    unsigned int getSynchronousCyclicInterval() const {
         if (transType < 0xFC)
             return 0;
         return transType - SYNCHRONOUS_CYCLIC;
@@ -210,7 +215,7 @@ public:
         inhibitTime = time;
     }
 
-    uint16_t getInhibitTime() {
+    uint16_t getInhibitTime() const {
         return inhibitTime;
     }
 
@@ -218,7 +223,7 @@ public:
         reserved = res;
     }
 
-    uint8_t getReserved() {
+    uint8_t getReserved() const {
         return reserved;
     }
 
@@ -226,20 +231,33 @@ public:
         timer = et;
     }
 
-    EventTimer getEventTimer() {
+    EventTimer getEventTimer() const {
         return timer;
     }
 
     void addMapping(SDOIndex local, SDOIndex remote, uint8_t length) {
         /* Should we check if the total length is greater than 64 bit? */
+
+        if(getMappingTotalLength() + length > MAX_MAPPING_LENGTH) {
+          throw std::runtime_error("mapping length cannot be greater than 8 bytes");
+        }
+
         uint8_t position = map.size() + 1;
         MappingEntry entry {local, remote, length, position};
         map.push_back(entry);
     }
 
-    Mapping getMap() {
+    // return the sum of the length of each entry
+    uint getMappingTotalLength() const {
+      return std::accumulate(map.begin(), map.end(), 0,
+                      [](auto a, auto e) {return a + e.length;});
+    }
+
+    Mapping getMap() const {
         return map;
     }
+
+
 };
 
 }

@@ -5,6 +5,7 @@
 
 #include "hlcanopen/sdo_client_node_manager.hpp"
 #include "hlcanopen/sdo_server_node_manager.hpp"
+#include "hlcanopen/pdo_client.hpp"
 #include "hlcanopen/object_dictionary.hpp"
 #include "hlcanopen/sdo_client_request_callback.hpp"
 #include "hlcanopen/sdo_client_request_promise.hpp"
@@ -33,7 +34,8 @@ public:
   nodeId(nodeId),
   managerType(type),
   sdoClientNodeManager(nullptr),
-  sdoServerNodeManager(nullptr) {
+  sdoServerNodeManager(nullptr),
+  pdoClient(*this, card) {
     if(type == NodeManagerType::CLIENT) {
       sdoClientNodeManager = std::make_unique<SdoClientNodeManager<C>>(nodeId, card, objDict);
     } else {
@@ -107,9 +109,6 @@ public:
   }
 
   void updateQueue() {
-//     if (sdoClientNodeManager == nullptr)
-//       std::cout << "NULL pointer" << std::endl;
-//     else sdoClientNodeManager->updateQueue();
     if (sdoClientNodeManager != nullptr) {
       sdoClientNodeManager->updateQueue();
     }
@@ -127,6 +126,7 @@ private:
   NodeManagerType managerType;
   std::unique_ptr<SdoClientNodeManager<C>> sdoClientNodeManager;
   std::unique_ptr<SdoServerNodeManager<C>> sdoServerNodeManager;
+  PdoClient<NodeManager, C> pdoClient;
 };
 
 }

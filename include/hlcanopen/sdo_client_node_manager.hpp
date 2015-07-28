@@ -59,7 +59,7 @@ public:
   template<typename T> folly::Future<folly::Unit> writeSdo(const SDOIndex& sdoIndex, T value,
 							       long timeout = 5000) {
     SdoData sdoData = convertValue<T>(value);
-    SdoClientWriteRequestPromise* request = new SdoClientWriteRequestPromise(sdoIndex, sdoData, timeout); /* XXX TO in promise? */
+    SdoClientWriteRequestPromise* request = new SdoClientWriteRequestPromise(sdoIndex, sdoData, timeout);
     folly::Future<folly::Unit> future = request->getFuture();
     sdoClientRequests.push(std::unique_ptr<SdoClientWriteRequest>(request));
     startNextSdoRequestIfPossible();

@@ -10,6 +10,7 @@
 #include "hlcanopen/can_msg_utils.hpp"
 #include "hlcanopen/object_dictionary.hpp"
 #include "hlcanopen/utils.hpp"
+#include "hlcanopen/pdo_configuration.hpp"
 
 
 #include <boost/coroutine/asymmetric_coroutine.hpp>
@@ -37,47 +38,45 @@ struct PDOEntry {
 };
 
 
-template<class C> class PdoClient {
+template<template<typename C> class N, class C> class PdoClient {
     typedef boost::coroutines::asymmetric_coroutine<CanMsg> coroutine;
 
-    NodeId nodeId;
-    C& card;
-    SdoClient<C> sdoClient {nodeId, card};
-    std::unique_ptr<coroutine::push_type> sdoCoroutine;
-    SdoData receivedData;
-    TransStatus currentTransStatus;
-    ObjectDictionary od;
-
+    // N is NodeManager, but we use a template parameter in order to allow
+    // unit testing
+    N<C>& nodeManager;
     std::map<COBId, std::vector<PDOEntry>> PDOMap;
+    ObjectDictionary od;
+    C& card;
 
 public:
-    PdoClient(NodeId nodeId, C& card) :
-        nodeId(nodeId),
-        card(card),
-        sdoClient(nodeId, card)
+    PdoClient(N<C>& nodeManager, C& card) :
+      nodeManager(nodeManager),
+      card(card)
     {
     }
 
-    void writeConfiguration(PdoConfiguration configuration) {
-        unsigned int index = configuration.getPdoNumber() - 1;
+    auto resetPdoConfiguration(unsigned int index) {
         const SdoData zero_data {
             0, 0, 0, 0
         };
 
         /* Disable the PDO configuration */
-        sdoClient.writeToNode(SDOIndex(index, COB_ID_SUB_INDEX), convertValue(0x00));
+        nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index, COB_ID_SUB_INDEX), 0).wait();
+        nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index + 0x200, 0), 0).wait();
+    }
 
-        /* Disable the PDO mapping */
-        sdoClient.writeToNode(SDOIndex(index + 0x200, 0), zero_data);
+    auto setupCommunicationParameters(unsigned int index, const PdoConfiguration& configuration) {
+        nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index, TRANSMISSION_TYPE_SUB_INDEX),
+                                   configuration.getTransmissionTypeValue()).wait();
+        nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index, INHIBIT_TIME_SUB_INDEX),
+                                   configuration.getInhibitTime()).wait();
+        nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index, RESERVED_SUB_INDEX),
+                                   configuration.getReserved()).wait();
+        return nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index, EVENT_TIMER_SUB_INDEX),
+                                          configuration.getEventTimer()).wait();
+    }
 
-        sdoClient.writeToNode(SDOIndex(index, TRANSMISSION_TYPE_SUB_INDEX), convertValue(configuration.getTransmissionTypeValue()));
-
-        sdoClient.writeToNode(SDOIndex(index, INHIBIT_TIME_SUB_INDEX), convertValue(configuration.getInhibitTime()));
-
-        sdoClient.writeToNode(SDOIndex(index, RESERVED_SUB_INDEX), convertValue(configuration.getReserved()));
-
-        sdoClient.writeToNode(SDOIndex(index, EVENT_TIMER_SUB_INDEX), convertValue(configuration.getEventTimer()));
-
+    auto setupMapping(unsigned int index, const PdoConfiguration& configuration) {
         auto mapp = configuration.getMap();
         uint8_t i = 1;
         PDOEntry entry;
@@ -86,16 +85,25 @@ public:
         for (auto it = mapp.begin(); it != mapp.end(); it++, i++) {
             entry.length = it->length;
             entry.local_object = it->local;
-            sdoClient.writeToNode(SDOIndex(index + 0x200, i), convertValue(it->getValue()));
+            nodeManager.template writeSdoRemote<uint32_t> (SDOIndex(index + 0x200, i), it->getValue()).wait();
             vect[it->position] = entry;
         }
 
         PDOMap[configuration.getCobIdPdo()] = vect;
 
-        sdoClient.writeToNode(SDOIndex(index + 0x200, 0), convertValue((uint8_t) i - 1));
+        return nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index + 0x200, 0), (uint8_t) i - 1).wait();
+    }
+
+    void writeConfiguration(PdoConfiguration configuration) {
+        unsigned int index = configuration.getPdoNumber() - 1;
+
+        resetPdoConfiguration(index);
+        setupCommunicationParameters(index, configuration);
+        setupMapping(index, configuration);
 
         /* Enable the PDO */
-        sdoClient.writeToNode(SDOIndex(index, COB_ID_SUB_INDEX), convertValue(configuration.getCobIdValue()));
+        nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index, COB_ID_SUB_INDEX),
+                                   configuration.getCobIdValue()).wait();
     }
 
     void receiveTPDO(CanMsg& msg) {
