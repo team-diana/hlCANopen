@@ -1,0 +1,18 @@
+box: teamdiana/diana
+
+# Read more about pipelines on our dev center
+# http://devcenter.wercker.com/docs/pipelines/index.html
+build:
+    # Steps make up the actions in your pipeline
+    # Read more about steps on our dev center:
+    # http://devcenter.wercker.com/docs/steps/index.html
+  steps:
+    - script:
+        name: echo
+        code: |
+          git clone https://github.com/team-diana/hlCANopen.git
+          mkdir build
+          cd build
+          cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/g++-4.9 -DCMAKE_C_COMPILER=/usr/bin/gcc-4.9 -DBOOST_ROOT=/opt/boost
+          make 
+          make test
