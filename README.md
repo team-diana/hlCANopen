@@ -1,6 +1,6 @@
 # hlCANopen
 
-![travis master](https://travis-ci.org/team-diana/hlCANopen.svg?branch=master)
+[![wercker status](https://app.wercker.com/status/18a40d6f13270ec27c6ef5b4b3d4c5b8/s "wercker status")](https://app.wercker.com/project/bykey/18a40d6f13270ec27c6ef5b4b3d4c5b8)
 
 **hlCANopen** is an high-level C++ library for the CANopen protocol.
 
@@ -11,6 +11,8 @@ in comparision to other libraries.
 
 - [Boost](www.boost.org)
 - [Folly](https://github.com/facebook/folly)
+
+Note: it may be necessary to build folly and hlCANopen with the same compiler.
 
 ## Examples
 
@@ -77,15 +79,15 @@ make test
 The library uses C++14, and was tested with the following compilers:
 
 ```
-gcc 4.9.2
-clang 3.5.1
+gcc 5.1
+clang 3.6
 ```
 
 ## Ubuntu
 Ubuntu still does not provide BOOST 1.57
 it is possible to build it using https://github.com/team-diana/repo-scripts
 
-also, at least gcc-4.9 or clang-3.5 must be installed:
+also, at least gcc-5 or clang-3.6 must be installed:
 http://askubuntu.com/a/456849
 
 Then:
@@ -123,3 +125,4 @@ The library is currently under development.
 ## Libraries Used
 - Boost www.boost.org
 - easyloggingcpp https://github.com/easylogging/easyloggingpp
+- folly https://github.com/facebook/folly
