@@ -13,6 +13,6 @@ build:
           git clone https://github.com/team-diana/hlCANopen.git
           mkdir build
           cd build
-          cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/g++-4.9 -DCMAKE_C_COMPILER=/usr/bin/gcc-4.9 -DBOOST_ROOT=/opt/boost
+          cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/g++-5 -DCMAKE_C_COMPILER=/usr/bin/gcc-5 -DBOOST_ROOT=/opt/boost
           make 
           make test
