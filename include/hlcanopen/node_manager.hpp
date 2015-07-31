@@ -126,7 +126,7 @@ private:
   NodeManagerType managerType;
   std::unique_ptr<SdoClientNodeManager<C>> sdoClientNodeManager;
   std::unique_ptr<SdoServerNodeManager<C>> sdoServerNodeManager;
-  PdoClient<NodeManager, C> pdoClient;
+  PdoClient<hlcanopen::NodeManager, C> pdoClient;
 };
 
 }

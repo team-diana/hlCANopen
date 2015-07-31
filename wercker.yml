@@ -8,7 +8,7 @@ build:
     # http://devcenter.wercker.com/docs/steps/index.html
   steps:
     - script:
-        name: echo
+        name: build
         code: |
           git clone https://github.com/team-diana/hlCANopen.git
           mkdir build
