@@ -44,7 +44,7 @@ namespace hlcanopen {
     } else {
       loadDefaultConfig(confDirAbs);
 
-      std::array<const char*, 4> customLoggerNames = {"interface", "canopen_manager", "sdo", "pdo"};
+      std::array<const char*, 4> customLoggerNames = {{"interface", "canopen_manager", "sdo", "pdo"}};
       std::for_each(customLoggerNames.begin(), customLoggerNames.end(), [&](auto name){
         boost::filesystem::path confFile = confDirAbs;
         confFile.append(std::string("./") + name + ".conf");

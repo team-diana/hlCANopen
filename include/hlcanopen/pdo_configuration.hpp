@@ -199,6 +199,7 @@ public:
             return ASYNCHRONOUS_RTR;
         if (transType == 0xFE)
             return ASYNCHRONOUS;
+        throw std::logic_error("unknown transmision type");
     }
 
     uint8_t getTransmissionTypeValue() const {

@@ -13,6 +13,8 @@ namespace hlcanopen {
 
   typedef std::vector<uint8_t> SdoData;
 
+  std::string sdoDataToHexString(const SdoData& data);
+
   typedef unsigned int NodeId;
 
   enum class COBType {

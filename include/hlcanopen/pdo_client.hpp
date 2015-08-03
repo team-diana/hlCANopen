@@ -118,7 +118,6 @@ public:
     void writeRPDO(COBId cobId) {
         CanMsg msg;
         msg.cobId = cobId;
-        uint64_t d = 0;
         unsigned int pos = 0;
         for (auto entry : PDOMap(msg.cobId)) {
             pos += entry.second.local_object;
