@@ -90,19 +90,25 @@ it is possible to build it using https://github.com/team-diana/repo-scripts
 also, at least gcc-5 or clang-3.6 must be installed:
 http://askubuntu.com/a/456849
 
-Then:
+Then, in order to create the build files:
 
 ```
-cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/g++-4.9 -DCMAKE_C_COMPILER=/usr/bin/gcc-4.9 -DBOOST_ROOT=/opt/boost
+cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/g++-5 -DCMAKE_C_COMPILER=/usr/bin/gcc-5 -DBOOST_ROOT=/opt/boost
 ```
 
 or using clang:
 
 ```
-cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.5 -DCMAKE_C_COMPILER=/usr/bin/clang-3.5 -DBOOST_ROOT=/opt/boost
+cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/clang++-3.6 -DCMAKE_C_COMPILER=/usr/bin/clang-3.6 -DBOOST_ROOT=/opt/boost
 ```
 
-run the tests to check if everything is everything is fine:
+make and run the tests as above in order to check if everything is everything is fine:
+
+It may also be necessary to add the boost and folly path to LD_LIBRARY_PATH before running anything that uses folly or boost >=1.57
+
+```bash
+export LD_LIBRARY_PATH=/opt/boost/lib/:/usr/local/lib:$LD_LIBRARY_PATH
+```
 
 ## Implementation details
 In order to handle multiple nodes concurrently this library uses **Boost Coroutine**. So the

@@ -18,65 +18,65 @@ namespace hlcanopen {
 
 template<class T> class SdoClientReadRequestCallback : public SdoClientReadRequest {
 public:
-  SdoClientReadRequestCallback(SDOIndex sdoIndex, std::function<void(folly::Try<T>)> callback,
-			       long timeout) :
-    SdoClientReadRequest(sdoIndex, timeout),
-    callback(callback) {}
+    SdoClientReadRequestCallback(SDOIndex sdoIndex, std::function<void(folly::Try<T>)> callback,
+                                 long timeout) :
+        SdoClientReadRequest(sdoIndex, timeout),
+        callback(callback) {}
 
-  ~SdoClientReadRequestCallback() {};
+    ~SdoClientReadRequestCallback() {};
 
-  virtual void completeRequest(const SdoData& data) override {
-    T v = convertSdoData<T>(data);
-    callCallbackWithValue(v);
-  }
+    virtual void completeRequest(const SdoData& data) override {
+        T v = convertSdoData<T>(data);
+        callCallbackWithValue(v);
+    }
 
-  virtual void completeRequestWithFail(const SdoError& err) override  {
-    callCallbackWithException<>(err);
-  }
+    virtual void completeRequestWithFail(const SdoError& err) override  {
+        callCallbackWithException<>(err);
+    }
 
-  virtual void completeRequestWithTimeout() override  {
-    const SdoError err = SdoError(TIMEOUT);
-    callCallbackWithException<>(err);
-  }
+    virtual void completeRequestWithTimeout() override  {
+        const SdoError err = SdoError(TIMEOUT);
+        callCallbackWithException<>(err);
+    }
 
 protected:
-  void callCallbackWithValue(const T value) {
-    folly::Try<T> t(value);
-    callback(t);
-  };
+    void callCallbackWithValue(const T value) {
+        folly::Try<T> t(value);
+        callback(t);
+    };
 
-  template <typename E> void callCallbackWithException(const E ex) {
-    folly::Try<T> t(folly::make_exception_wrapper<E>(ex));
-    callback(t);
-  }
+    template <typename E> void callCallbackWithException(const E ex) {
+        folly::Try<T> t(folly::make_exception_wrapper<E>(ex));
+        callback(t);
+    }
 
 private:
-  std::function<void(folly::Try<T>)> callback;
+    std::function<void(folly::Try<T>)> callback;
 };
 
 class SdoClientWriteRequestCallback : public SdoClientWriteRequest {
 public:
-  SdoClientWriteRequestCallback(SDOIndex sdoIndex, SdoData sdoData,
-                                   std::function<void(folly::Try<folly::Unit> )> callback,
-				   long timeout) :
-                                SdoClientWriteRequest(sdoIndex, sdoData, timeout),
-                                callback(callback) {}
-  virtual ~SdoClientWriteRequestCallback() {}
+    SdoClientWriteRequestCallback(SDOIndex sdoIndex, SdoData sdoData,
+                                  std::function<void(folly::Try<folly::Unit> )> callback,
+                                  long timeout) :
+        SdoClientWriteRequest(sdoIndex, sdoData, timeout),
+        callback(callback) {}
+    virtual ~SdoClientWriteRequestCallback() {}
 
-  void completeRequest() override {
-    callback(folly::Try<folly::Unit>(folly::Unit()));
-  }
-  void completeRequestWithFail(const SdoError& err) override {
-    folly::Try<folly::Unit> t(folly::make_exception_wrapper<SdoError>(err));
-    callback(t);
-  }
-  void completeRequestWithTimeout() override {
-    folly::Try<folly::Unit> t(folly::make_exception_wrapper<SdoError>(SdoError(TIMEOUT)));
-    callback(t);
-  }
+    void completeRequest() override {
+        callback(folly::Try<folly::Unit>(folly::Unit()));
+    }
+    void completeRequestWithFail(const SdoError& err) override {
+        folly::Try<folly::Unit> t(folly::make_exception_wrapper<SdoError>(err));
+        callback(t);
+    }
+    void completeRequestWithTimeout() override {
+        folly::Try<folly::Unit> t(folly::make_exception_wrapper<SdoError>(SdoError(TIMEOUT)));
+        callback(t);
+    }
 
 private:
-  std::function<void(folly::Try<folly::Unit>)> callback;
+    std::function<void(folly::Try<folly::Unit>)> callback;
 };
 
 }

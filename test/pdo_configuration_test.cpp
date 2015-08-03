@@ -17,9 +17,9 @@
 #include "cansim/bi_pipe.hpp"
 #include "cansim/bus_less_card.hpp"
 
-#include "boost/test/unit_test.hpp"
-#include "boost/core/ignore_unused.hpp"
-#include "boost/assert.hpp"
+#include <boost/assert.hpp>
+#include <boost/test/unit_test.hpp>
+#include <boost/core/ignore_unused.hpp>
 
 #include <iostream>
 #include <bitset>
@@ -34,9 +34,9 @@ BOOST_TEST_DONT_PRINT_LOG_VALUE(TransStatus);
 
 typedef BusLessCard<CanMsg> TestCard;
 
-// void printSdoData(const SdoData& data) {
-//   std::cout << "SdoData: " << sdoDataToHexString(data) << std::endl;
-// }
+void printSdoData(const SdoData& data) {
+  std::cout << "SdoData: " << sdoDataToHexString(data) << std::endl;
+}
 
 // Emulates a node manager that is able to send sdo messages.
 template <typename C> struct NodeManagerMock {

@@ -199,7 +199,8 @@ public:
             return ASYNCHRONOUS_RTR;
         if (transType == 0xFE)
             return ASYNCHRONOUS;
-        throw std::logic_error("unknown transmision type");
+        std::runtime_error("unknown TransmissionType");
+        return ASYNCHRONOUS;
     }
 
     uint8_t getTransmissionTypeValue() const {
@@ -240,7 +241,7 @@ public:
         /* Should we check if the total length is greater than 64 bit? */
 
         if(getMappingTotalLength() + length > MAX_MAPPING_LENGTH) {
-          throw std::runtime_error("mapping length cannot be greater than 8 bytes");
+            throw std::runtime_error("mapping length cannot be greater than 8 bytes");
         }
 
         uint8_t position = map.size() + 1;
@@ -250,8 +251,10 @@ public:
 
     // return the sum of the length of each entry
     uint getMappingTotalLength() const {
-      return std::accumulate(map.begin(), map.end(), 0,
-                      [](auto a, auto e) {return a + e.length;});
+        return std::accumulate(map.begin(), map.end(), 0,
+        [](auto a, auto e) {
+            return a + e.length;
+        });
     }
 
     Mapping getMap() const {

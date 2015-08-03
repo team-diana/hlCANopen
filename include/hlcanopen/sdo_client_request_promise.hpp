@@ -20,60 +20,60 @@ namespace hlcanopen {
 
 template<typename T> class SdoClientReadRequestPromise : public SdoClientReadRequest {
 public:
-  SdoClientReadRequestPromise(SDOIndex sdoIndex, long timeout) :
-   SdoClientReadRequest(sdoIndex, timeout),
-   promise() {
+    SdoClientReadRequestPromise(SDOIndex sdoIndex, long timeout) :
+        SdoClientReadRequest(sdoIndex, timeout),
+        promise() {
 
-  }
-  virtual ~SdoClientReadRequestPromise() {}
+    }
+    virtual ~SdoClientReadRequestPromise() {}
 
-  void completeRequest(const SdoData& data) override {
-    promise.setValue(convertSdoData<T>(data));
-  }
+    void completeRequest(const SdoData& data) override {
+        promise.setValue(convertSdoData<T>(data));
+    }
 
-  void completeRequestWithFail(const SdoError& error) override {
-    promise.setException(error);
-  }
+    void completeRequestWithFail(const SdoError& error) override {
+        promise.setException(error);
+    }
 
-  void completeRequestWithTimeout() override {
-    const SdoError error(SdoErrorCode::TIMEOUT);
-    promise.setException(error);
-  }
+    void completeRequestWithTimeout() override {
+        const SdoError error(SdoErrorCode::TIMEOUT);
+        promise.setException(error);
+    }
 
-  folly::Future<T> getFuture() {
-    return promise.getFuture();
-  }
+    folly::Future<T> getFuture() {
+        return promise.getFuture();
+    }
 
 private:
-  folly::Promise<T> promise;
+    folly::Promise<T> promise;
 };
 
 class SdoClientWriteRequestPromise : public SdoClientWriteRequest {
 public:
-  SdoClientWriteRequestPromise(SDOIndex sdoIndex, SdoData sdoData, long timeout) :
-   SdoClientWriteRequest(sdoIndex, sdoData, timeout),
-   promise() {}
-  virtual ~SdoClientWriteRequestPromise() {}
+    SdoClientWriteRequestPromise(SDOIndex sdoIndex, SdoData sdoData, long timeout) :
+        SdoClientWriteRequest(sdoIndex, sdoData, timeout),
+        promise() {}
+    virtual ~SdoClientWriteRequestPromise() {}
 
-  void completeRequest() override {
-    promise.setValue();
-  }
+    void completeRequest() override {
+        promise.setValue();
+    }
 
-  void completeRequestWithFail(const SdoError& error) override {
-    promise.setException(error);
-  }
+    void completeRequestWithFail(const SdoError& error) override {
+        promise.setException(error);
+    }
 
-  void completeRequestWithTimeout() override {
-    const SdoError error = SdoError(SdoErrorCode::TIMEOUT);
-    promise.setException(error);
-  }
+    void completeRequestWithTimeout() override {
+        const SdoError error = SdoError(SdoErrorCode::TIMEOUT);
+        promise.setException(error);
+    }
 
-  folly::Future<folly::Unit> getFuture() {
-    return promise.getFuture();
-  }
+    folly::Future<folly::Unit> getFuture() {
+        return promise.getFuture();
+    }
 
 private:
-  folly::Promise<folly::Unit> promise;
+    folly::Promise<folly::Unit> promise;
 };
 
 }

@@ -19,28 +19,28 @@ namespace hlcanopen {
 template <class C> class SdoServerNodeManager {
 
 public:
-  SdoServerNodeManager(NodeId nodeId, C& card, ObjectDictionary& objDict) :
-    nodeId(nodeId),
-    card(card),
-    objDict(objDict) {}
+    SdoServerNodeManager(NodeId nodeId, C& card, ObjectDictionary& objDict) :
+        nodeId(nodeId),
+        card(card),
+        objDict(objDict) {}
 
-  // Message received from client
-  void handleSdoReceive(const CanMsg& msg) {
-    if(currentRequest == nullptr) {
-      currentRequest = std::make_unique<SdoServerRequest<C>>(nodeId, card, objDict, msg);
-    } else {
-      currentRequest->newMsg(msg);
+    // Message received from client
+    void handleSdoReceive(const CanMsg& msg) {
+        if(currentRequest == nullptr) {
+            currentRequest = std::make_unique<SdoServerRequest<C>>(nodeId, card, objDict, msg);
+        } else {
+            currentRequest->newMsg(msg);
+        }
+        if(currentRequest->isCompleted()) {
+            currentRequest = nullptr;
+        }
     }
-    if(currentRequest->isCompleted()) {
-      currentRequest = nullptr;
-    }
-  }
 
 private:
-  NodeId nodeId;
-  C& card;
-  ObjectDictionary& objDict;
-  std::unique_ptr<SdoServerRequest<C>> currentRequest;
+    NodeId nodeId;
+    C& card;
+    ObjectDictionary& objDict;
+    std::unique_ptr<SdoServerRequest<C>> currentRequest;
 //   std::map<SDOIndex, std::unique_ptr<SdoServerRequest<C>>, SDOIndexCompare> requestsMap;
 };
 

@@ -13,54 +13,54 @@
 
 namespace hlcanopen {
 
-  typedef boost::variant<uint32_t, int32_t, std::string> ODEntryValue;
-  enum class EntryAccess : unsigned char {
+typedef boost::variant<uint32_t, int32_t, std::string> ODEntryValue;
+enum class EntryAccess : unsigned char {
     READONLY,
     WRITEONLY,
     READWRITE
-  };
-  struct ODEntry {
+};
+struct ODEntry {
     EntryAccess access;
     ODEntryValue value;
-  };
+};
 
-  class ObjectDictionary {
-  public:
+class ObjectDictionary {
+public:
     void write(SDOIndex index, ODEntryValue value) {
-      ODEntry entry = map[index];
-      entry.value = value;
-      map[index] = entry;
+        ODEntry entry = map[index];
+        entry.value = value;
+        map[index] = entry;
     }
 
     bool writeCheckAccess(SDOIndex index, ODEntryValue value) {
-      ODEntry entry = map[index];
-      if(entry.access == EntryAccess::READONLY) {
-        return false;
-      } else entry.value = value;
-      return true;
+        ODEntry entry = map[index];
+        if(entry.access == EntryAccess::READONLY) {
+            return false;
+        } else entry.value = value;
+        return true;
     }
 
     ODEntryValue read(SDOIndex index) {
-      return map[index].value;
+        return map[index].value;
     }
 
     bool contains(SDOIndex index) {
-      return map.find(index) != map.end();
+        return map.find(index) != map.end();
     }
 
     EntryAccess getAccess(SDOIndex index) {
-      return map[index].access;
+        return map[index].access;
     }
 
     void setAccess(SDOIndex index, EntryAccess access) {
-      ODEntry entry = map[index];
-      entry.access = access;
-      map[index] = entry;
+        ODEntry entry = map[index];
+        entry.access = access;
+        map[index] = entry;
     }
 
-  private:
+private:
     std::map<SDOIndex, ODEntry, SDOIndexCompare> map;
-  };
+};
 
 }
 

@@ -50,8 +50,8 @@ template<template<typename C> class N, class C> class PdoClient {
 
 public:
     PdoClient(N<C>& nodeManager, C& card) :
-      nodeManager(nodeManager),
-      card(card)
+        nodeManager(nodeManager),
+        card(card)
     {
     }
 
@@ -67,13 +67,13 @@ public:
 
     auto setupCommunicationParameters(unsigned int index, const PdoConfiguration& configuration) {
         nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index, TRANSMISSION_TYPE_SUB_INDEX),
-                                   configuration.getTransmissionTypeValue()).wait();
+                configuration.getTransmissionTypeValue()).wait();
         nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index, INHIBIT_TIME_SUB_INDEX),
-                                   configuration.getInhibitTime()).wait();
+                configuration.getInhibitTime()).wait();
         nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index, RESERVED_SUB_INDEX),
-                                   configuration.getReserved()).wait();
+                configuration.getReserved()).wait();
         return nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index, EVENT_TIMER_SUB_INDEX),
-                                          configuration.getEventTimer()).wait();
+                configuration.getEventTimer()).wait();
     }
 
     auto setupMapping(unsigned int index, const PdoConfiguration& configuration) {
@@ -103,7 +103,7 @@ public:
 
         /* Enable the PDO */
         nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index, COB_ID_SUB_INDEX),
-                                   configuration.getCobIdValue()).wait();
+                configuration.getCobIdValue()).wait();
     }
 
     void receiveTPDO(CanMsg& msg) {
