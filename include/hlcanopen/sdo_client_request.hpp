@@ -29,75 +29,75 @@ public:
 
 class SdoClientRequest {
 public:
-  SdoClientRequest(SDOIndex sdoIndex, long timeout) :
-  sdoIndex(sdoIndex),
-  timestamp(getTimestamp() + timeout) {}
+    SdoClientRequest(SDOIndex sdoIndex, long timeout) :
+        sdoIndex(sdoIndex),
+        timestamp(getTimestamp() + timeout) {}
 
-  virtual ~SdoClientRequest() {}
+    virtual ~SdoClientRequest() {}
 
-  virtual void visitStart(SdoRequestVisitor& visitor) = 0;
-  virtual void visitEnd(SdoRequestVisitor& visitor) = 0;
-  virtual void visitTimeout(SdoRequestVisitor& visitor) = 0;
+    virtual void visitStart(SdoRequestVisitor& visitor) = 0;
+    virtual void visitEnd(SdoRequestVisitor& visitor) = 0;
+    virtual void visitTimeout(SdoRequestVisitor& visitor) = 0;
 
-  SDOIndex sdoIndex;
+    SDOIndex sdoIndex;
 
-  long timestamp;
+    long timestamp;
 
 private:
-  long getTimestamp() {
-    auto ts = std::chrono::duration_cast< std::chrono::milliseconds >(
-		  std::chrono::system_clock::now().time_since_epoch())
-		  .count();
-    return ts;
-  }
+    long getTimestamp() {
+        auto ts = std::chrono::duration_cast< std::chrono::milliseconds >(
+                      std::chrono::system_clock::now().time_since_epoch())
+                  .count();
+        return ts;
+    }
 };
 
 class SdoClientReadRequest : public SdoClientRequest {
 public:
-  // The value of typeToken is not actually used, only its type it's needed.
-  SdoClientReadRequest(SDOIndex sdoIndex, long timeout) :
-    SdoClientRequest(sdoIndex, timeout) {}
-  virtual ~SdoClientReadRequest() {}
+    // The value of typeToken is not actually used, only its type it's needed.
+    SdoClientReadRequest(SDOIndex sdoIndex, long timeout) :
+        SdoClientRequest(sdoIndex, timeout) {}
+    virtual ~SdoClientReadRequest() {}
 
-  virtual void completeRequest(const SdoData& sdoData) = 0;
-  virtual void completeRequestWithFail(const SdoError& error) = 0;
-  virtual void completeRequestWithTimeout() = 0;
+    virtual void completeRequest(const SdoData& sdoData) = 0;
+    virtual void completeRequestWithFail(const SdoError& error) = 0;
+    virtual void completeRequestWithTimeout() = 0;
 
-  virtual void visitStart(SdoRequestVisitor& visitor) override {
-      visitor.visitSdoClientRequestStart(*this);
-  }
-  virtual void visitEnd(SdoRequestVisitor& visitor) override {
-      visitor.visitSdoClientRequestEnd(*this);
-  }
-  virtual void visitTimeout(SdoRequestVisitor& visitor) override {
-      visitor.visitSdoClientRequestTimeout(*this);
-  }
+    virtual void visitStart(SdoRequestVisitor& visitor) override {
+        visitor.visitSdoClientRequestStart(*this);
+    }
+    virtual void visitEnd(SdoRequestVisitor& visitor) override {
+        visitor.visitSdoClientRequestEnd(*this);
+    }
+    virtual void visitTimeout(SdoRequestVisitor& visitor) override {
+        visitor.visitSdoClientRequestTimeout(*this);
+    }
 
 };
 
 class SdoClientWriteRequest : public SdoClientRequest {
 public:
-  // The value of typeToken is not actually used, only its type it's needed.
-  SdoClientWriteRequest(SDOIndex sdoIndex, SdoData sdoData, long timeout) :
-    SdoClientRequest(sdoIndex, timeout),
-    sdoData(sdoData) {}
-  virtual ~SdoClientWriteRequest() {};
+    // The value of typeToken is not actually used, only its type it's needed.
+    SdoClientWriteRequest(SDOIndex sdoIndex, SdoData sdoData, long timeout) :
+        SdoClientRequest(sdoIndex, timeout),
+        sdoData(sdoData) {}
+    virtual ~SdoClientWriteRequest() {};
 
-  virtual void completeRequest() = 0;
-  virtual void completeRequestWithFail(const SdoError& error) = 0;
-  virtual void completeRequestWithTimeout() = 0;
+    virtual void completeRequest() = 0;
+    virtual void completeRequestWithFail(const SdoError& error) = 0;
+    virtual void completeRequestWithTimeout() = 0;
 
-  virtual void visitStart(SdoRequestVisitor& visitor) override {
-      visitor.visitSdoClientRequestStart(*this);
-  }
-  virtual void visitEnd(SdoRequestVisitor& visitor) override {
-      visitor.visitSdoClientRequestEnd(*this);
-  }
-  virtual void visitTimeout(SdoRequestVisitor& visitor) override {
-      visitor.visitSdoClientRequestTimeout(*this);
-  }
+    virtual void visitStart(SdoRequestVisitor& visitor) override {
+        visitor.visitSdoClientRequestStart(*this);
+    }
+    virtual void visitEnd(SdoRequestVisitor& visitor) override {
+        visitor.visitSdoClientRequestEnd(*this);
+    }
+    virtual void visitTimeout(SdoRequestVisitor& visitor) override {
+        visitor.visitSdoClientRequestTimeout(*this);
+    }
 
-  SdoData sdoData;
+    SdoData sdoData;
 };
 
 

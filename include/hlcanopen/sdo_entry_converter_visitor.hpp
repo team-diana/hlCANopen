@@ -21,17 +21,17 @@ public:
 
 class SdoEntryWriteVisitor : public boost::static_visitor<ODEntryValue> {
 public:
-  SdoEntryWriteVisitor(SdoData data);
+    SdoEntryWriteVisitor(SdoData data);
 
-  ODEntryValue operator()(int32_t i);
-  ODEntryValue operator()(uint32_t i);
-  ODEntryValue operator()(const std::string& str);
-
-private:
-  void checkAndFixSize(SdoData& d, unsigned int nBytes);
+    ODEntryValue operator()(int32_t i);
+    ODEntryValue operator()(uint32_t i);
+    ODEntryValue operator()(const std::string& str);
 
 private:
-  SdoData data;
+    void checkAndFixSize(SdoData& d, unsigned int nBytes);
+
+private:
+    SdoData data;
 };
 
 }

@@ -20,7 +20,8 @@
 #include "cansim/bi_pipe.hpp"
 #include "cansim/bus_less_card.hpp"
 
-#include "boost/test/unit_test.hpp"
+#include <boost/test/unit_test.hpp>
+#include <boost/core/ignore_unused.hpp>
 
 
 using namespace std;
@@ -32,15 +33,18 @@ BOOST_TEST_DONT_PRINT_LOG_VALUE(TransStatus);
 typedef BusLessCard<CanMsg> TestCard;
 
 void print_bytes(const CanMsg& msg) {
-  std::cout << msg << std::endl;
+    std::cout << msg << std::endl;
 }
 
 template <typename C> class NodeManagerMock {
-  template<typename T> folly::Future<folly::Unit> writeSdoRemote(const SDOIndex& sdoIndex, T data,
-                     long timeout = 5000) {
-    Promise<folly::Unit> a;
-    return a.getFuture();
-  }
+    template<typename T> folly::Future<folly::Unit> writeSdoRemote(const SDOIndex& sdoIndex, T data,
+            long timeout = 5000) {
+        Promise<folly::Unit> a;
+        boost::ignore_unused(sdoIndex);
+        boost::ignore_unused(data);
+        boost::ignore_unused(timeout);
+        return a.getFuture();
+    }
 };
 
 BOOST_AUTO_TEST_CASE(PdoConfigurationTest) {

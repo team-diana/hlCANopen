@@ -25,9 +25,12 @@ include_directories(${Boost_INCLUDE_DIRS})
 add_library(hlcanopen SHARED
             src/sdo_error.cpp
             src/types.cpp
+            src/can_msg.cpp
             src/can_msg_utils.cpp
             src/logging.cpp
+            src/utils.cpp
             src/sdo_entry_converter_visitor.cpp
+            src/logging/logging_conf_loader.cpp
             src/executor/unique_thread_executor.cpp
           )
 target_link_libraries(hlcanopen folly atomic pthread glog ${Boost_LIBRARIES})

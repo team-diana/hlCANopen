@@ -27,87 +27,87 @@ typedef Bus<CanMsg> TestBus;
 typedef Card<CanMsg> TestCard;
 
 BOOST_AUTO_TEST_CASE(SdoCanOpenManagerTimeoutRemoteRead) {
-  std::shared_ptr<TestBus> bus = std::make_shared<TestBus>();
-  TestCard cardA(1, bus);
-  TestCard cardB(2, bus);
+    std::shared_ptr<TestBus> bus = std::make_shared<TestBus>();
+    TestCard cardA(1, bus);
+    TestCard cardB(2, bus);
 
-  NodeId nodeA = 1;
-  SDOIndex sdoIndex1(0xABCD, 1);
-  SDOIndex sdoIndex2(0xDDEE, 0);
-
-
-  CanOpenManager<TestCard> managerB(cardB, std::chrono::milliseconds(0));
-  managerB.initNode(nodeA, NodeManagerType::CLIENT);
-  auto result1 = managerB.readSdoRemote<int32_t>(nodeA, sdoIndex1, 1000);
-  auto result2 = managerB.readSdoRemote<string>(nodeA, sdoIndex2, 1000);
-
-  thread bt = thread([&](){
-    managerB.run();
-  });
-
-  bus->writeEmptyMsg();
-
-  result1.wait();
-  result2.wait();
-
-  SdoError error1 = SdoError(SdoErrorCode::TIMEOUT);
-  SdoError error2 = SdoError(SdoErrorCode::TIMEOUT);
+    NodeId nodeA = 1;
+    SDOIndex sdoIndex1(0xABCD, 1);
+    SDOIndex sdoIndex2(0xDDEE, 0);
 
 
-  BOOST_CHECK_EQUAL(result1.hasValue(), false);
-  BOOST_CHECK_EQUAL(result2.hasValue(), false);
+    CanOpenManager<TestCard> managerB(cardB, std::chrono::milliseconds(0));
+    managerB.initNode(nodeA, NodeManagerType::CLIENT);
+    auto result1 = managerB.readSdoRemote<int32_t>(nodeA, sdoIndex1, 1000);
+    auto result2 = managerB.readSdoRemote<string>(nodeA, sdoIndex2, 1000);
 
-  BOOST_CHECK_EQUAL(getSdoError(result1).what(), error1.what());
-  BOOST_CHECK_EQUAL(getSdoError(result2).what(), error2.what());
+    thread bt = thread([&]() {
+        managerB.run();
+    });
 
-  managerB.stop();
+    bus->writeEmptyMsg();
 
-  bus->writeEmptyMsg();
+    result1.wait();
+    result2.wait();
 
-  bt.join();
+    SdoError error1 = SdoError(SdoErrorCode::TIMEOUT);
+    SdoError error2 = SdoError(SdoErrorCode::TIMEOUT);
+
+
+    BOOST_CHECK_EQUAL(result1.hasValue(), false);
+    BOOST_CHECK_EQUAL(result2.hasValue(), false);
+
+    BOOST_CHECK_EQUAL(getSdoError(result1).what(), error1.what());
+    BOOST_CHECK_EQUAL(getSdoError(result2).what(), error2.what());
+
+    managerB.stop();
+
+    bus->writeEmptyMsg();
+
+    bt.join();
 }
 
 BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRemoteWrite) {
-  std::shared_ptr<TestBus> bus = std::make_shared<TestBus>();
-  TestCard cardA(1, bus);
-  TestCard cardB(2, bus);
+    std::shared_ptr<TestBus> bus = std::make_shared<TestBus>();
+    TestCard cardA(1, bus);
+    TestCard cardB(2, bus);
 
-  NodeId nodeA = 1;
-  SDOIndex sdoIndex1(0xABCD, 1);
-  SDOIndex sdoIndex2(0xDDEE, 0);
+    NodeId nodeA = 1;
+    SDOIndex sdoIndex1(0xABCD, 1);
+    SDOIndex sdoIndex2(0xDDEE, 0);
 
-  int32_t value=0xAABBCCDD;
-  string str = "hello world!";
+    int32_t value=0xAABBCCDD;
+    string str = "hello world!";
 
-  CanOpenManager<TestCard> managerB(cardB, std::chrono::milliseconds(0));
+    CanOpenManager<TestCard> managerB(cardB, std::chrono::milliseconds(0));
 
-  thread bt = thread([&](){
-    managerB.run();
-  });
+    thread bt = thread([&]() {
+        managerB.run();
+    });
 
-  managerB.initNode(nodeA, NodeManagerType::CLIENT);
-  auto result1 = managerB.writeSdoRemote<int32_t>(nodeA, sdoIndex1, value, 1500);
+    managerB.initNode(nodeA, NodeManagerType::CLIENT);
+    auto result1 = managerB.writeSdoRemote<int32_t>(nodeA, sdoIndex1, value, 1500);
 
-  SdoError error1 = SdoError(SdoErrorCode::TIMEOUT);
+    SdoError error1 = SdoError(SdoErrorCode::TIMEOUT);
 
-  result1.wait();
+    result1.wait();
 
-  BOOST_CHECK_EQUAL(result1.hasValue(), false);
-  BOOST_CHECK_EQUAL(getSdoError(result1).what(), error1.what());
+    BOOST_CHECK_EQUAL(result1.hasValue(), false);
+    BOOST_CHECK_EQUAL(getSdoError(result1).what(), error1.what());
 
-  volatile bool valueReceived = false;
-  managerB.writeSdoRemote<string>(nodeA, sdoIndex2, str, [&](Try<Unit> res){
-    BOOST_CHECK_EQUAL(res.hasValue(), false);
-    valueReceived = true;
-  }, 1000);
+    volatile bool valueReceived = false;
+    managerB.writeSdoRemote<string>(nodeA, sdoIndex2, str, [&](Try<Unit> res) {
+        BOOST_CHECK_EQUAL(res.hasValue(), false);
+        valueReceived = true;
+    }, 1000);
 
-  while(!valueReceived ) {}
+    while(!valueReceived ) {}
 
-  managerB.stop();
+    managerB.stop();
 
-  bus->writeEmptyMsg();
+    bus->writeEmptyMsg();
 
-  bt.join();
+    bt.join();
 #if 0
 #endif
 }

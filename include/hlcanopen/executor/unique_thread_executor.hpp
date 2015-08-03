@@ -14,19 +14,19 @@ namespace hlcanopen {
  */
 class UniqueThreadExecutor : public folly::Executor {
 public:
-  UniqueThreadExecutor();
-  virtual ~UniqueThreadExecutor();
+    UniqueThreadExecutor();
+    virtual ~UniqueThreadExecutor();
 
-  UniqueThreadExecutor(const UniqueThreadExecutor& t) = delete;
+    UniqueThreadExecutor(const UniqueThreadExecutor& t) = delete;
 
-  void add(folly::Func f) override;
+    void add(folly::Func f) override;
 
 private:
-  std::queue<folly::Func> workQueue;
-  std::mutex mutex;
-  std::thread thread;
-  bool done = false;
-  folly::LifoSem sem;
+    std::queue<folly::Func> workQueue;
+    std::mutex mutex;
+    std::thread thread;
+    bool done = false;
+    folly::LifoSem sem;
 };
 
 }
