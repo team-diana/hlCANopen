@@ -18,6 +18,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <thread>
+#include <functional>
 #include <iostream>
 
 using namespace hlcanopen;
@@ -173,6 +174,64 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerUniqueThreadExecutor) {
     int32_t readValue = result1.get();
 
     BOOST_CHECK_EQUAL(value, readValue);
+
+    managerA.stop();
+    managerB.stop();
+
+    bus->writeEmptyMsg();
+
+    at.join();
+    bt.join();
+}
+
+BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRecursiveLambda) {
+    std::shared_ptr<TestBus> bus = std::make_shared<TestBus>();
+    TestCard cardA(1, bus);
+    TestCard cardB(2, bus);
+
+    CanOpenManager<TestCard> managerA(cardA, std::chrono::milliseconds(0));
+    NodeId nodeA = 1;
+    managerA.initNode(nodeA, NodeManagerType::SERVER);
+    SDOIndex sdoIndex1(0xABCD, 1);
+
+    managerA.writeSdoLocal(nodeA, sdoIndex1, 0);
+
+    thread at = thread([&]() {
+        managerA.run();
+    });
+
+    CanOpenManager<TestCard> managerB(cardB, std::chrono::milliseconds(0));
+    managerB.initNode(nodeA, NodeManagerType::CLIENT);
+    auto executor = std::make_shared<UniqueThreadExecutor>();
+    managerB.setDefaultFutureExecutor(executor);
+
+    std::atomic<int> counter(0);
+
+    std::function<folly::Future<bool>(int32_t)> recursiveLambda = [&](int32_t value) {
+      counter++;
+      if(value == 1) {
+        Promise<bool> p;
+        p.setValue(true);
+        return p.getFuture();
+      }
+      return managerB.readSdoRemote<int32_t>(nodeA, sdoIndex1).then(recursiveLambda);
+    };
+
+    auto result1 = managerB.readSdoRemote<int32_t>(nodeA, sdoIndex1).then([&](){
+      return recursiveLambda(0);
+    });
+
+    thread bt = thread([&]() {
+        managerB.run();
+    });
+
+    bus->writeEmptyMsg();
+
+    while(counter < 10) {
+      // no-op;
+    }
+    managerA.writeSdoLocal(nodeA, sdoIndex1, 1);
+    cout << "wrote new value" << endl;
 
     managerA.stop();
     managerB.stop();

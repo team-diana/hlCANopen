@@ -15,7 +15,7 @@ namespace hlcanopen {
 //     template<typename T, typename D> T convert_data(D&& data);
 template<typename T> T convertSdoData(const SdoData& d) {
     boost::ignore_unused(d);
-    //NOT_IMPLEMENTED_YET;
+    NOT_IMPLEMENTED_YET;
     // TODO: how to disable this at compile-time?
 //       static_assert(false, "unable to convert to this type.");
     T r;
@@ -36,6 +36,10 @@ template<> uint32_t convertSdoData<uint32_t> (const SdoData& d) {
                      ((uint32_t)d[2] << 16)  |
                      ((uint32_t)d[3] << 24);
     return value;
+}
+
+template<> uint8_t convertSdoData<uint8_t> (const SdoData& d) {
+    return convertSdoData< uint32_t >(d);
 }
 
 template<> std::string convertSdoData<std::string> (const SdoData& d) {

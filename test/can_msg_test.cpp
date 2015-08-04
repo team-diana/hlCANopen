@@ -59,3 +59,18 @@ BOOST_AUTO_TEST_CASE(CanMsgCopy) {
     BOOST_CHECK_EQUAL(0x1, copy[0]);
     BOOST_CHECK_EQUAL(0x2, copy[7]);
 }
+
+BOOST_AUTO_TEST_CASE(CanMsgAssign) {
+    CanMsg msg;
+
+    msg.cobId = COBId(0x1, 0x2);
+    msg[0] = 0x1;
+    msg[7] = 0x2;
+
+    CanMsg copy;
+    copy = msg;
+
+    BOOST_CHECK_EQUAL(COBId(0x1, 0x2), copy.cobId);
+    BOOST_CHECK_EQUAL(0x1, copy[0]);
+    BOOST_CHECK_EQUAL(0x2, copy[7]);
+}

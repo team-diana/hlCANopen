@@ -9,7 +9,7 @@ void initCustomLogger(const char* loggerName, const boost::filesystem::path conf
 
 
     if(boost::filesystem::exists(confFilePath)) {
-        std::cout << "Reading from : " << confFilePath << std::endl;
+//         std::cout << "Reading from : " << confFilePath << std::endl;
         el::Configurations conf(confFilePath.c_str());
         el::Loggers::reconfigureLogger(loggerName, conf);
     }
@@ -20,10 +20,9 @@ void loadDefaultConfig(const boost::filesystem::path& confDirAbs) {
     confFileAbs.append(std::string("./") + "default.conf");
 
     if(boost::filesystem::exists(confFileAbs)) {
-        std::cout << "Reading from : " << confFileAbs << std::endl;
+//         std::cout << "Reading from : " << confFileAbs << std::endl;
         el::Configurations conf(confFileAbs.c_str());
         el::Loggers::reconfigureLogger("default", conf);
-        std::cout << "default set ok" << std::endl;
         el::Loggers::setDefaultConfigurations(conf);
     }
 }

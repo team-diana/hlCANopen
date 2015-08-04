@@ -17,6 +17,7 @@ struct CanMsg {
     CanMsg();
     CanMsg(const CanMsg& oth) = default;
     CanMsg(CanMsg&& oth) = default;
+    CanMsg& operator=(const CanMsg& other) = default;
 
     // From MSB to LSB
     uint8_t byteat(int index) const;
