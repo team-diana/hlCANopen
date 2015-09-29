@@ -11,6 +11,7 @@
 #include "hlcanopen/sdo_client_request_promise.hpp"
 #include "hlcanopen/utils.hpp"
 #include "hlcanopen/can_msg.hpp"
+#include "hlcanopen/sdo_data_converter.hpp"
 
 #include "boost/assert.hpp"
 

@@ -32,6 +32,9 @@ add_library(hlcanopen SHARED
             src/sdo_entry_converter_visitor.cpp
             src/logging/logging_conf_loader.cpp
             src/executor/unique_thread_executor.cpp
+            src/sdo_client.cpp
+            src/sdo_client_node_manager.cpp
+            src/sdo_data_converter.cpp
           )
 target_link_libraries(hlcanopen folly atomic pthread glog ${Boost_LIBRARIES})
 

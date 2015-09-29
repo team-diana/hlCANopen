@@ -24,21 +24,9 @@ namespace hlcanopen {
 class SdoClientNodeManager : public SdoRequestVisitor {
 
 public:
-    SdoClientNodeManager(NodeId nodeId, CanCard& card, ObjectDictionary& objDict) :
-        nodeId(nodeId),
-        card(card),
-        objDict(objDict),
-        sdoClient(nodeId, card) {}
+    SdoClientNodeManager(NodeId nodeId, CanCard& card, ObjectDictionary& objDict);
 
-    // Message arrived from server
-    // this is ok both for read from server and write to server
-    // for write, the request will have return type void
-    void handleSdoTransmit(const CanMsg& m) {
-        sdoClient.newMsg(m);
-        if(sdoClient.transmissionIsEnded()) {
-            sdoClientRequests.front()->visitEnd(*this);
-        }
-    }
+    void handleSdoTransmit(const CanMsg& m);
 
     template<typename T> folly::Future<T> readSdo(const SDOIndex& sdoIndex, long timeout = 5000) {
         SdoClientReadRequestPromise<T>* request = new SdoClientReadRequestPromise<T>(sdoIndex, timeout);
@@ -75,93 +63,20 @@ public:
         startNextSdoRequestIfPossible();
     }
 
-    void updateQueue() {
-//    while ( && !isValid(sdoClientRequests.front()->timestamp)) {
-        while (true) {
-            if (sdoClientRequests.empty()) {
-                return;
-            }
-            if (isValid(sdoClientRequests.front()->timestamp)) {
-                return;
-            }
-            sdoClientRequests.front()->visitTimeout(*this);
-        }
-    }
+    void updateQueue();
 
 private:
-    void startNextSdoRequestIfPossible() {
-        if(sdoClientRequests.size() > 0 && sdoClient.getTransStatus() == TransStatus::NO_TRANS) {
-            startNextSdoRequest();
-        }
-    }
-
-    void startNextSdoRequest() {
-        CLOG(INFO, "sdo") << "starting new sdo request";
-        sdoClientRequests.front()->visitStart(*this);
-    }
-
-    void visitSdoClientRequestStart(const SdoClientReadRequest& request) override {
-        sdoClient.readFromNode(request.sdoIndex);
-    }
-
-    void visitSdoClientRequestStart(const SdoClientWriteRequest& request) override {
-        sdoClient.writeToNode(request.sdoIndex, request.sdoData);
-    }
-
-    void visitSdoClientRequestEnd(SdoClientReadRequest& request) override {
-        TransStatus transStatus = sdoClient.getTransStatus();
-        if(transStatus == TransStatus::END_ERR) {
-            CLOG(INFO, "sdo") << "end sdo read request with ERR";
-            request.completeRequestWithFail(sdoClient.getSdoError());
-        } else if(transStatus == TransStatus::END_OK) {
-            CLOG(INFO, "sdo") << "end sdo read request with OK";
-            request.completeRequest(sdoClient.getResponseData());
-        }
-        endRequest();
-    }
-
-    void visitSdoClientRequestTimeout(SdoClientReadRequest& request) override {
-        CLOG(INFO, "sdo") << "end sdo request with TIMEOUT";
-        request.completeRequestWithTimeout();
-        endRequest();
-    }
-
-    void visitSdoClientRequestEnd(SdoClientWriteRequest& request) override {
-        TransStatus transStatus = sdoClient.getTransStatus();
-        if(transStatus == TransStatus::END_ERR) {
-            CLOG(WARNING, "sdo") << "end sdo write request with ERROR";
-            request.completeRequestWithFail(sdoClient.getSdoError());
-        } else if(transStatus == TransStatus::END_TIMEOUT) { /* XXX */
-            CLOG(WARNING, "sdo") << "end sdo write request with TIMEOUT";
-            request.completeRequestWithTimeout();
-        } else if(transStatus == TransStatus::END_OK) {
-            CLOG(INFO, "sdo") << "end sdo write request with OK";
-            request.completeRequest();
-        }
-        endRequest();
-    }
-
-    void visitSdoClientRequestTimeout(SdoClientWriteRequest& request) override {
-        request.completeRequestWithTimeout();
-        endRequest();
-    }
-
-    void endRequest() {
-        sdoClientRequests.pop();
-        sdoClient.cleanForNextRequest();
-        startNextSdoRequestIfPossible();
-    }
-
-    bool isValid(long timestamp) {
-        return getTimestamp() < timestamp;
-    }
-
-    long getTimestamp() {
-        auto ts = std::chrono::duration_cast< std::chrono::milliseconds >(
-                      std::chrono::system_clock::now().time_since_epoch())
-                  .count();
-        return ts;
-    }
+    void startNextSdoRequestIfPossible();
+    void startNextSdoRequest();
+    void visitSdoClientRequestStart(const SdoClientReadRequest& request) override;
+    void visitSdoClientRequestStart(const SdoClientWriteRequest& request) override;
+    void visitSdoClientRequestEnd(SdoClientReadRequest& request) override;
+    void visitSdoClientRequestTimeout(SdoClientReadRequest& request) override;
+    void visitSdoClientRequestEnd(SdoClientWriteRequest& request) override;
+    void visitSdoClientRequestTimeout(SdoClientWriteRequest& request) override;
+    void endRequest();
+    bool isValid(long timestamp);
+    long getTimestamp();
 
 private:
     NodeId nodeId;
