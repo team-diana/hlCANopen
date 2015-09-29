@@ -111,10 +111,10 @@ private:
     void visitSdoClientRequestEnd(SdoClientReadRequest& request) override {
         TransStatus transStatus = sdoClient.getTransStatus();
         if(transStatus == TransStatus::END_ERR) {
-            CLOG(INFO, "sdo") << "end sdo request with ERR";
+            CLOG(INFO, "sdo") << "end sdo read request with ERR";
             request.completeRequestWithFail(sdoClient.getSdoError());
         } else if(transStatus == TransStatus::END_OK) {
-            CLOG(INFO, "sdo") << "end sdo request with OK";
+            CLOG(INFO, "sdo") << "end sdo read request with OK";
             request.completeRequest(sdoClient.getResponseData());
         }
         endRequest();
@@ -129,10 +129,13 @@ private:
     void visitSdoClientRequestEnd(SdoClientWriteRequest& request) override {
         TransStatus transStatus = sdoClient.getTransStatus();
         if(transStatus == TransStatus::END_ERR) {
+            CLOG(WARNING, "sdo") << "end sdo write request with ERROR";
             request.completeRequestWithFail(sdoClient.getSdoError());
         } else if(transStatus == TransStatus::END_TIMEOUT) { /* XXX */
+            CLOG(WARNING, "sdo") << "end sdo write request with TIMEOUT";
             request.completeRequestWithTimeout();
         } else if(transStatus == TransStatus::END_OK) {
+            CLOG(INFO, "sdo") << "end sdo write request with OK";
             request.completeRequest();
         }
         endRequest();

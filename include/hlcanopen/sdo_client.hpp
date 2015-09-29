@@ -65,8 +65,12 @@ public:
     }
 
     void newMsg(CanMsg msg) {
-        BOOST_ASSERT_MSG(sdoCoroutine != nullptr, "coroutine was not started");
-        (*sdoCoroutine)(msg);
+//         BOOST_ASSERT_MSG(sdoCoroutine != nullptr, "coroutine was not started");
+        if(sdoCoroutine == nullptr) {
+            CLOG(ERROR, "sdo") << "coroutine was not started";
+        } else {
+            (*sdoCoroutine)(msg);
+        }
     }
 
     TransStatus getTransStatus() {
