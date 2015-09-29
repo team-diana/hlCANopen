@@ -18,10 +18,10 @@
 #include <mutex>
 
 namespace hlcanopen {
-template<class C> class CanOpenManager {
+class CanOpenManager {
 
 public:
-    CanOpenManager(C& card, std::chrono::milliseconds sleepInterval = std::chrono::milliseconds(150))  :
+    CanOpenManager(CanCard& card, std::chrono::milliseconds sleepInterval = std::chrono::milliseconds(150))  :
         card(card),
         running(false),
         intervalSleepTime(sleepInterval)
@@ -108,7 +108,7 @@ public:
     template<typename T> T readSdoLocal(NodeId nodeId, SDOIndex sdoIndex) {
         assertNodeExist(nodeId);
         std::unique_lock<std::mutex> lock(mutex);
-        return nodeManagers[nodeId]->template readSdoLocal<T>(sdoIndex);
+        return nodeManagers[nodeId]->readSdoLocal<T>(sdoIndex);
     }
 
     template<typename T> void writeSdoLocal(NodeId nodeId, SDOIndex sdoIndex, T value) {
@@ -125,7 +125,7 @@ public:
             long timeout = 5000) {
         initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
         std::unique_lock<std::mutex> lock(mutex);
-        folly::Future<T> fut = nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex, timeout);
+        folly::Future<T> fut = nodeManagers[nodeId]->readSdoRemote<T>(sdoIndex, timeout);
         return addExecutorIfAny(std::move(fut));
     }
 
@@ -134,14 +134,14 @@ public:
                                             long timeout = 5000) {
         initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
         std::unique_lock<std::mutex> lock(mutex);
-        nodeManagers[nodeId]->template readSdoRemote<T>(sdoIndex, callback, timeout);
+        nodeManagers[nodeId]->readSdoRemote<T>(sdoIndex, callback, timeout);
     }
 
     template<typename T> folly::Future<folly::Unit> writeSdoRemote(NodeId nodeId, const SDOIndex& sdoIndex, T value,
             long timeout = 5000) {
         initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
         std::unique_lock<std::mutex> lock(mutex);
-        folly::Future<folly::Unit> fut =  nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value, timeout);
+        folly::Future<folly::Unit> fut =  nodeManagers[nodeId]->writeSdoRemote<T>(sdoIndex, value, timeout);
         return addExecutorIfAny(std::move(fut));
     }
 
@@ -150,12 +150,12 @@ public:
             long timeout = 5000) {
         initNodeIfNonExistent(nodeId, NodeManagerType::CLIENT);
         std::unique_lock<std::mutex> lock(mutex);
-        nodeManagers[nodeId]->template writeSdoRemote<T>(sdoIndex, value, callback, timeout);
+        nodeManagers[nodeId]->writeSdoRemote<T>(sdoIndex, value, callback, timeout);
     }
 
 
     void initNode(NodeId nodeId, NodeManagerType type) {
-        nodeManagers.emplace(nodeId, std::make_unique<NodeManager<C>>(nodeId, card, type));
+        nodeManagers.emplace(nodeId, std::make_unique<NodeManager>(nodeId, card, type));
     }
 
     void stop() {
@@ -169,7 +169,7 @@ private:
     }
 
     void initNodeIfNonExistent(NodeId nodeId, NodeManagerType type) {
-        nodeManagers.emplace(nodeId, std::make_unique<NodeManager<C>>(nodeId, card, type));
+        nodeManagers.emplace(nodeId, std::make_unique<NodeManager>(nodeId, card, type));
     }
 
     template<typename T> folly::Future<T> addExecutorIfAny(folly::Future<T>&& fut) {
@@ -182,8 +182,8 @@ private:
 
 
 private:
-    std::map<NodeId, std::unique_ptr<NodeManager<C>>> nodeManagers;
-    C& card;
+    std::map<NodeId, std::unique_ptr<NodeManager>> nodeManagers;
+    CanCard& card;
     bool running;
     std::chrono::milliseconds intervalSleepTime;
     std::mutex mutex;

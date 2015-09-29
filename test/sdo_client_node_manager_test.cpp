@@ -27,7 +27,7 @@ using namespace folly;
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TransStatus);
 
-typedef BusLessCard<CanMsg> TestCard;
+typedef BusLessCard TestCard;
 
 BOOST_AUTO_TEST_CASE(SdoClientNodeManagerReadFutureTest) {
     auto testCardAndPipe = TestCard::makeWithTestBiPipe();
@@ -35,13 +35,13 @@ BOOST_AUTO_TEST_CASE(SdoClientNodeManagerReadFutureTest) {
     std::shared_ptr<BiPipe<CanMsg>> testPipe = std::get<1>(testCardAndPipe);
     ObjectDictionary objDict;
 
-    SdoClientNodeManager<TestCard> nodeManager(1, card, objDict);
+    SdoClientNodeManager nodeManager(1, card, objDict);
 
     SDOIndex sdoIndex(0xAABB, 0);
 
     int32_t valueToBeRead=0xAABBCCDD;
 
-    auto response = nodeManager.readSdo<int32_t>(sdoIndex);
+    auto response = nodeManager.template readSdo<int32_t>(sdoIndex);
 
     std::thread managerThread(
     [&]() {
@@ -80,13 +80,13 @@ BOOST_AUTO_TEST_CASE(SdoClientNodeManagerReadCallbackTest) {
     std::shared_ptr<BiPipe<CanMsg>> testPipe = std::get<1>(testCardAndPipe);
     ObjectDictionary objDict;
 
-    SdoClientNodeManager<TestCard> nodeManager(1, card, objDict);
+    SdoClientNodeManager nodeManager(1, card, objDict);
     bool stopThread = false;
 
     SDOIndex sdoIndex(0xAABB, 1);
     uint32_t valueToBeRead=0xCAFECAFE;
 
-    nodeManager.readSdo<int32_t>(sdoIndex, [&](Try<int32_t> sdoResponse) {
+    nodeManager.template readSdo<int32_t>(sdoIndex, [&](Try<int32_t> sdoResponse) {
         BOOST_CHECK_EQUAL(true, sdoResponse.hasValue());
         BOOST_CHECK_EQUAL(valueToBeRead, sdoResponse.value());
         stopThread = true;
@@ -126,7 +126,7 @@ BOOST_AUTO_TEST_CASE(SdoClientNodeManagerWriteFutureTest) {
     std::shared_ptr<BiPipe<CanMsg>> testPipe = std::get<1>(testCardAndPipe);
     ObjectDictionary objDict;
 
-    SdoClientNodeManager<TestCard> nodeManager(1, card, objDict);
+    SdoClientNodeManager nodeManager(1, card, objDict);
 
     SDOIndex sdoIndex(0xAABB, 0);
     int32_t valueToWrite=0xAABBCCDD;
@@ -167,7 +167,7 @@ BOOST_AUTO_TEST_CASE(SdoClientNodeManagerWriteCallbackTest) {
     std::shared_ptr<BiPipe<CanMsg>> testPipe = std::get<1>(testCardAndPipe);
     ObjectDictionary objDict;
 
-    SdoClientNodeManager<TestCard> nodeManager(1, card, objDict);
+    SdoClientNodeManager nodeManager(1, card, objDict);
 
     SDOIndex sdoIndex(0xAABB, 0);
     int32_t valueToWrite=0xAABBCCDD;

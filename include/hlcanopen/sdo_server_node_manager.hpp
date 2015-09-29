@@ -16,10 +16,10 @@
 
 namespace hlcanopen {
 
-template <class C> class SdoServerNodeManager {
+class SdoServerNodeManager {
 
 public:
-    SdoServerNodeManager(NodeId nodeId, C& card, ObjectDictionary& objDict) :
+    SdoServerNodeManager(NodeId nodeId, CanCard& card, ObjectDictionary& objDict) :
         nodeId(nodeId),
         card(card),
         objDict(objDict) {}
@@ -27,7 +27,7 @@ public:
     // Message received from client
     void handleSdoReceive(const CanMsg& msg) {
         if(currentRequest == nullptr) {
-            currentRequest = std::make_unique<SdoServerRequest<C>>(nodeId, card, objDict, msg);
+            currentRequest = std::make_unique<SdoServerRequest>(nodeId, card, objDict, msg);
         } else {
             currentRequest->newMsg(msg);
         }
@@ -38,9 +38,9 @@ public:
 
 private:
     NodeId nodeId;
-    C& card;
+    CanCard& card;
     ObjectDictionary& objDict;
-    std::unique_ptr<SdoServerRequest<C>> currentRequest;
+    std::unique_ptr<SdoServerRequest> currentRequest;
 //   std::map<SDOIndex, std::unique_ptr<SdoServerRequest<C>>, SDOIndexCompare> requestsMap;
 };
 

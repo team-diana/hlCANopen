@@ -18,7 +18,7 @@ using namespace std;
 using namespace hlcanopen;
 
 
-typedef BusLessCard<CanMsg> TestCard;
+typedef BusLessCard TestCard;
 
 BOOST_AUTO_TEST_CASE(SdoServerExpeditedReadRequestTest) {
     auto testCardAndPipe = TestCard::makeWithTestBiPipe();
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE(SdoServerExpeditedReadRequestTest) {
     setSdoClientCommandSpecifier(canMsg, SdoClientCommandSpecifier::INITIATE_UPLOAD);
     setSdoIndex(canMsg, readIndex);
 
-    SdoServerRequest<TestCard> sdoServerRequest(nodeId, card, objDict, canMsg);
+    SdoServerRequest sdoServerRequest(nodeId, card, objDict, canMsg);
 
     BOOST_CHECK_EQUAL(true, sdoServerRequest.isCompleted());
     CanMsg serverAnswer = testPipe->read();
@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(SdoServerSegmentedReadRequestTest) {
         setSdoClientCommandSpecifier(canMsg, SdoClientCommandSpecifier::INITIATE_UPLOAD);
         setSdoIndex(canMsg, readIndex);
 
-        SdoServerRequest<TestCard> sdoServerRequest(nodeId, card, objDict, canMsg);
+        SdoServerRequest sdoServerRequest(nodeId, card, objDict, canMsg);
 
         // Receive start upload ack message
         BOOST_CHECK_EQUAL(false, sdoServerRequest.isCompleted());
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE(SdoServerExpeditedWriteRequestTest) {
     setSdoExpeditedTransfer(canMsg, true);
     setLast4Byte(canMsg, valueToWrite);
 
-    SdoServerRequest<TestCard> sdoServerRequest(nodeId, card, objDict, canMsg);
+    SdoServerRequest sdoServerRequest(nodeId, card, objDict, canMsg);
 
     BOOST_CHECK_EQUAL(true, sdoServerRequest.isCompleted());
     ODEntryValue writtenValue = objDict.read(writeIndex);
@@ -145,7 +145,7 @@ BOOST_AUTO_TEST_CASE(SdoServerSegmentedWriteRequestTest) {
         setSdoExpeditedTransfer(canMsg, false);
         setSdoIndex(canMsg, writeIndex);
 
-        SdoServerRequest<TestCard> sdoServerRequest(nodeId, card, objDict, canMsg);
+        SdoServerRequest sdoServerRequest(nodeId, card, objDict, canMsg);
 
         // Receive start upload ack message
         BOOST_CHECK_EQUAL(false, sdoServerRequest.isCompleted());

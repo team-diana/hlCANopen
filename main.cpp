@@ -1,21 +1,22 @@
 #include "include/hlcanopen/can_open_manager.hpp"
 
 #include <boost/core/ignore_unused.hpp>
+#include <hlcanopen/can_card.hpp>
 
 using namespace hlcanopen;
 
-template <typename T> class Fake {
-public:
-    template<class M> void write(M&& ) {
+class Fake : public CanCard {
+  public:
+    virtual void write(const CanMsg& msg) override {
     }
 
-    T read() {
+    virtual CanMsg read() override {
     }
 };
 
 int main(int argc, char** argv) {
-    Fake<CanMsg> asdf;
-    hlcanopen::CanOpenManager<Fake<CanMsg>> a(asdf);
+    Fake asdf;
+    hlcanopen::CanOpenManager a(asdf);
 
     boost::ignore_unused(argc);
     boost::ignore_unused(argv);

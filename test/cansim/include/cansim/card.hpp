@@ -1,17 +1,20 @@
-// Copyright (C) 2015 team-diana MIT license
+// Copyright (C) 2015 team-diana MICanMsg license
 
 #ifndef CARD_HPP
 #define CARD_HPP
+
+#include "hlcanopen/can_card.hpp"
+#include "hlcanopen/can_msg.hpp"
 
 #include "cansim/bus.hpp"
 
 #include <utility>
 
 
-template<class T> class Card {
+class Card : public hlcanopen::CanCard {
 
 public:
-    Card(unsigned int id, std::shared_ptr<Bus<T>> bus) :
+    Card(unsigned int id, std::shared_ptr<Bus<hlcanopen::CanMsg>> bus) :
         id(id),
         bus(bus) {
         bus->addCard(*this);
@@ -21,11 +24,11 @@ public:
         bus->removeCard(*this);
     }
 
-    template<class M> void write(M&& msg) {
-        bus->write(*this, std::forward<M>(msg));
+    virtual void write(const hlcanopen::CanMsg& msg) override {
+        bus->write(*this, msg);
     }
 
-    T read() {
+    virtual hlcanopen::CanMsg read() override {
         return bus->read(*this);
     }
 
@@ -40,7 +43,7 @@ public:
     }
 
     unsigned int id;
-    std::shared_ptr<Bus<T>> bus;
+    std::shared_ptr<Bus<hlcanopen::CanMsg>> bus;
 };
 
 #endif // CARD_HPP

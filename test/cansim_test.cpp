@@ -3,6 +3,9 @@
 #define BOOST_TEST_MODULE Cansim_test
 #include <boost/test/unit_test.hpp>
 
+#include "hlcanopen/logging/easylogging++.h"
+#include "hlcanopen/can_msg.hpp"
+
 #include "cansim/bus.hpp"
 #include "cansim/card.hpp"
 
@@ -10,11 +13,10 @@
 #include <thread>
 #include <vector>
 
-#include "hlcanopen/logging/easylogging++.h"
-
 INITIALIZE_EASYLOGGINGPP
 
 using namespace std;
+using namespace hlcanopen;
 
 struct Msg {
     std::string data;
@@ -46,34 +48,38 @@ BOOST_AUTO_TEST_CASE(PipeTest) {
 }
 
 BOOST_AUTO_TEST_CASE(BusTest) {
-    std::shared_ptr<Bus<Msg>> bus = std::make_shared<Bus<Msg>>();
+    std::shared_ptr<Bus<CanMsg>> bus = std::make_shared<Bus<CanMsg>>();
 
-    Card<Msg> a(1, bus);
-    Card<Msg> b(2, bus);
-    Card<Msg> c(3, bus);
+    Card a(1, bus);
+    Card b(2, bus);
+    Card c(3, bus);
 
     thread at = thread([&]() {
-        a.write(Msg {"msg_a_0"});
-        Msg bmsg = a.read();
-        BOOST_CHECK_EQUAL("msg_b_0", bmsg.data);
+        CanMsg msgA;
+        msgA.data = 0xA0;
+        a.write(msgA);
+        CanMsg bmsg = a.read();
+        BOOST_CHECK_EQUAL(0xB0, bmsg.data);
         bmsg = a.read();
-        BOOST_CHECK_EQUAL("msg_b_1", bmsg.data);
+        BOOST_CHECK_EQUAL(0xB1, bmsg.data);
     });
 
     thread bt = thread([&]() {
-        Msg amsg = b.read();
-        BOOST_CHECK_EQUAL("msg_a_0", amsg.data);
-        b.write(Msg {"msg_b_0"});
-        b.write(Msg {"msg_b_1"});
+        CanMsg amsg = b.read();
+        CanMsg msgB0; msgB0.data = 0xB0;
+        CanMsg msgB1; msgB1.data = 0xB1;
+        BOOST_CHECK_EQUAL(0xA0, amsg.data);
+        b.write(msgB0);
+        b.write(msgB1);
     });
 
     thread ct = thread([&]() {
-        Msg amsg = c.read();
-        BOOST_CHECK_EQUAL("msg_a_0", amsg.data);
-        Msg bmsg = c.read();
-        BOOST_CHECK_EQUAL("msg_b_0", bmsg.data);
+        CanMsg amsg = c.read();
+        BOOST_CHECK_EQUAL(0xA0, amsg.data);
+        CanMsg bmsg = c.read();
+        BOOST_CHECK_EQUAL(0xB0, bmsg.data);
         bmsg = c.read();
-        BOOST_CHECK_EQUAL("msg_b_1", bmsg.data);
+        BOOST_CHECK_EQUAL(0xB1, bmsg.data);
     });
 
     at.join();

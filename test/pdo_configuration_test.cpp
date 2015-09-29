@@ -32,14 +32,14 @@ using namespace folly;
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TransStatus);
 
-typedef BusLessCard<CanMsg> TestCard;
+typedef BusLessCard TestCard;
 
 void printSdoData(const SdoData& data) {
   std::cout << "SdoData: " << sdoDataToHexString(data) << std::endl;
 }
 
 // Emulates a node manager that is able to send sdo messages.
-template <typename C> struct NodeManagerMock {
+struct NodeManagerMock {
   std::queue<SdoData> dataQueue;
 
   template<typename T> folly::Future<folly::Unit> writeSdoRemote(const SDOIndex& sdoIndex, T data,
@@ -67,8 +67,8 @@ BOOST_AUTO_TEST_CASE(PdoConfigurationTest) {
   auto pipes = BiPipe<CanMsg>::make();
   TestCard card(std::get<1>(pipes));
 
-  NodeManagerMock<TestCard> nodeManagerMock;
-  PdoClient<NodeManagerMock, TestCard> client(nodeManagerMock, card);
+  NodeManagerMock nodeManagerMock;
+  PdoClient<NodeManagerMock> client(nodeManagerMock, card);
 
 
   PdoConfiguration config(TPDO, 1);

@@ -28,18 +28,18 @@ enum class NodeManagerType {
     SERVER, CLIENT
 };
 
-template <class C> class NodeManager {
+class NodeManager {
 public:
-    NodeManager(NodeId nodeId, C& card, NodeManagerType type) :
+    NodeManager(NodeId nodeId, CanCard& card, NodeManagerType type) :
         nodeId(nodeId),
         managerType(type),
         sdoClientNodeManager(nullptr),
         sdoServerNodeManager(nullptr),
         pdoClient(*this, card) {
         if(type == NodeManagerType::CLIENT) {
-            sdoClientNodeManager = std::make_unique<SdoClientNodeManager<C>>(nodeId, card, objDict);
+            sdoClientNodeManager = std::make_unique<SdoClientNodeManager>(nodeId, card, objDict);
         } else {
-            sdoServerNodeManager = std::make_unique<SdoServerNodeManager<C>>(nodeId, card, objDict);
+            sdoServerNodeManager = std::make_unique<SdoServerNodeManager>(nodeId, card, objDict);
         }
     }
 
@@ -126,9 +126,9 @@ private:
     NodeId nodeId;
     ObjectDictionary objDict;
     NodeManagerType managerType;
-    std::unique_ptr<SdoClientNodeManager<C>> sdoClientNodeManager;
-    std::unique_ptr<SdoServerNodeManager<C>> sdoServerNodeManager;
-    PdoClient<hlcanopen::NodeManager, C> pdoClient;
+    std::unique_ptr<SdoClientNodeManager> sdoClientNodeManager;
+    std::unique_ptr<SdoServerNodeManager> sdoServerNodeManager;
+    PdoClient<hlcanopen::NodeManager> pdoClient;
 };
 
 }

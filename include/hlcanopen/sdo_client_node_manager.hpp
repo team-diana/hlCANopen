@@ -21,10 +21,10 @@
 
 namespace hlcanopen {
 
-template <class C> class SdoClientNodeManager : public SdoRequestVisitor {
+class SdoClientNodeManager : public SdoRequestVisitor {
 
 public:
-    SdoClientNodeManager(NodeId nodeId, C& card, ObjectDictionary& objDict) :
+    SdoClientNodeManager(NodeId nodeId, CanCard& card, ObjectDictionary& objDict) :
         nodeId(nodeId),
         card(card),
         objDict(objDict),
@@ -165,9 +165,9 @@ private:
 
 private:
     NodeId nodeId;
-    C& card;
+    CanCard& card;
     ObjectDictionary& objDict;
-    SdoClient<C> sdoClient;
+    SdoClient sdoClient;
     std::queue<std::unique_ptr<SdoClientRequest>> sdoClientRequests;
 };
 

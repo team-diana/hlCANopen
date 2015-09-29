@@ -4,6 +4,7 @@
 #define OCO_SDO_SERVER_REQUEST_HPP
 
 #include "hlcanopen/can_msg.hpp"
+#include "hlcanopen/can_card.hpp"
 #include "hlcanopen/sdo_error.hpp"
 #include "hlcanopen/sdo_data_converter.hpp"
 #include "hlcanopen/types.hpp"
@@ -23,10 +24,10 @@ namespace hlcanopen {
 
 typedef boost::coroutines::asymmetric_coroutine<CanMsg> coroutine;
 
-template<class C> class SdoServerRequest {
+class SdoServerRequest {
 
 public:
-    SdoServerRequest(NodeId nodeId, C& card, ObjectDictionary& objDict, const CanMsg& startMsg) :
+    SdoServerRequest(NodeId nodeId, CanCard& card, ObjectDictionary& objDict, const CanMsg& startMsg) :
         nodeId(nodeId),
         card(card),
         objDict(objDict),
@@ -250,7 +251,7 @@ private:
 
 private:
     NodeId nodeId;
-    C& card;
+    CanCard& card;
     ObjectDictionary& objDict;
     std::unique_ptr<coroutine::push_type> serverCoroutine;
     bool completed;

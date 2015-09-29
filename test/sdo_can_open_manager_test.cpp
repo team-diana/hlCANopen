@@ -26,7 +26,7 @@ using namespace std;
 using namespace folly;
 
 typedef Bus<CanMsg> TestBus;
-typedef Card<CanMsg> TestCard;
+typedef Card TestCard;
 
 BOOST_FIXTURE_TEST_SUITE(SdoCanOpenManagerSuite, TestFixture)
 
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRemoteRead) {
     TestCard cardA(1, bus);
     TestCard cardB(2, bus);
 
-    CanOpenManager<TestCard> managerA(cardA, std::chrono::milliseconds(0));
+    CanOpenManager managerA(cardA, std::chrono::milliseconds(0));
     NodeId nodeA = 1;
     managerA.initNode(nodeA, NodeManagerType::SERVER);
     SDOIndex sdoIndex1(0xABCD, 1);
@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRemoteRead) {
     });
 
 
-    CanOpenManager<TestCard> managerB(cardB, std::chrono::milliseconds(0));
+    CanOpenManager managerB(cardB, std::chrono::milliseconds(0));
     managerB.initNode(nodeA, NodeManagerType::CLIENT);
     auto result1 = managerB.readSdoRemote<int32_t>(nodeA, sdoIndex1);
     auto result2 = managerB.readSdoRemote<string>(nodeA, sdoIndex2);
@@ -83,13 +83,13 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRemoteWrite) {
     TestCard cardA(1, bus);
     TestCard cardB(2, bus);
 
-    CanOpenManager<TestCard> managerA(cardA, std::chrono::milliseconds(0));
+    CanOpenManager managerA(cardA, std::chrono::milliseconds(0));
     NodeId nodeA = 1;
     managerA.initNode(nodeA, NodeManagerType::SERVER);
     SDOIndex sdoIndex1(0xABCD, 1);
     SDOIndex sdoIndex2(0xDDEE, 0);
 
-    managerA.writeSdoLocal<int32_t>(nodeA, sdoIndex1, 0);
+    managerA.template writeSdoLocal<int32_t>(nodeA, sdoIndex1, 0);
     managerA.writeSdoLocal(nodeA, sdoIndex2, "");
 
     managerA.setSdoAccessLocal(nodeA, sdoIndex1, EntryAccess::READWRITE);
@@ -102,7 +102,7 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRemoteWrite) {
     int32_t value=0xAABBCCDD;
     string str = "hello world!";
 
-    CanOpenManager<TestCard> managerB(cardB, std::chrono::milliseconds(0));
+    CanOpenManager managerB(cardB, std::chrono::milliseconds(0));
 
     thread bt = thread([&]() {
         managerB.run();
@@ -142,7 +142,7 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerUniqueThreadExecutor) {
     TestCard cardA(1, bus);
     TestCard cardB(2, bus);
 
-    CanOpenManager<TestCard> managerA(cardA, std::chrono::milliseconds(0));
+    CanOpenManager managerA(cardA, std::chrono::milliseconds(0));
     NodeId nodeA = 1;
     managerA.initNode(nodeA, NodeManagerType::SERVER);
     SDOIndex sdoIndex1(0xABCD, 1);
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerUniqueThreadExecutor) {
         managerA.run();
     });
 
-    CanOpenManager<TestCard> managerB(cardB, std::chrono::milliseconds(0));
+    CanOpenManager managerB(cardB, std::chrono::milliseconds(0));
     managerB.initNode(nodeA, NodeManagerType::CLIENT);
     auto result1 = managerB.readSdoRemote<int32_t>(nodeA, sdoIndex1);
 
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRecursiveLambda) {
     TestCard cardA(1, bus);
     TestCard cardB(2, bus);
 
-    CanOpenManager<TestCard> managerA(cardA, std::chrono::milliseconds(0));
+    CanOpenManager managerA(cardA, std::chrono::milliseconds(0));
     NodeId nodeA = 1;
     managerA.initNode(nodeA, NodeManagerType::SERVER);
     SDOIndex sdoIndex1(0xABCD, 1);
@@ -200,7 +200,7 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRecursiveLambda) {
         managerA.run();
     });
 
-    CanOpenManager<TestCard> managerB(cardB, std::chrono::milliseconds(0));
+    CanOpenManager managerB(cardB, std::chrono::milliseconds(0));
     managerB.initNode(nodeA, NodeManagerType::CLIENT);
     auto executor = std::make_shared<UniqueThreadExecutor>();
     managerB.setDefaultFutureExecutor(executor);
@@ -214,10 +214,10 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRecursiveLambda) {
         p.setValue(true);
         return p.getFuture();
       }
-      return managerB.readSdoRemote<int32_t>(nodeA, sdoIndex1).then(recursiveLambda);
+      return managerB.template readSdoRemote<int32_t>(nodeA, sdoIndex1).then(recursiveLambda);
     };
 
-    auto result1 = managerB.readSdoRemote<int32_t>(nodeA, sdoIndex1).then([&](){
+    auto result1 = managerB.template readSdoRemote<int32_t>(nodeA, sdoIndex1).then([&](){
       return recursiveLambda(0);
     });
 

@@ -22,7 +22,7 @@ using namespace hlcanopen;
 
 BOOST_TEST_DONT_PRINT_LOG_VALUE(TransStatus);
 
-typedef BusLessCard<CanMsg> TestCard;
+typedef BusLessCard TestCard;
 
 BOOST_AUTO_TEST_CASE(SdoClientExpeditedReadTest) {
     auto pipes = BiPipe<CanMsg>::make();
@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(SdoClientExpeditedReadTest) {
     NodeId nodeId = 1;
     std::shared_ptr<BiPipe<CanMsg>> testPipe = std::get<0>(pipes);
 
-    SdoClient<TestCard> client(nodeId, card);
+    SdoClient client(nodeId, card);
 
     BOOST_CHECK_EQUAL(TransStatus::NO_TRANS, client.getTransStatus());
     BOOST_CHECK_EQUAL(true, client.getSdoError().isNoError());
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE(SdoClientSegmentedReadTest) {
     NodeId nodeId = 1;
     std::shared_ptr<BiPipe<CanMsg>> testPipe = std::get<0>(pipes);
 
-    SdoClient<TestCard> client(nodeId, card);
+    SdoClient client(nodeId, card);
 
     for(unsigned int testIter = 0; testIter < 50; testIter++) {
         BOOST_CHECK_EQUAL(TransStatus::NO_TRANS, client.getTransStatus());
@@ -127,7 +127,7 @@ BOOST_AUTO_TEST_CASE(SdoClientExpeditedWriteTest) {
     NodeId nodeId = 1;
     std::shared_ptr<BiPipe<CanMsg>> testPipe = std::get<0>(pipes);
 
-    SdoClient<TestCard> client(nodeId, card);
+    SdoClient client(nodeId, card);
 
     BOOST_CHECK_EQUAL(TransStatus::NO_TRANS, client.getTransStatus());
     BOOST_CHECK_EQUAL(true, client.getSdoError().isNoError());
@@ -163,7 +163,7 @@ BOOST_AUTO_TEST_CASE(SdoClientSegmentedWriteTest) {
     NodeId nodeId = 1;
     std::shared_ptr<BiPipe<CanMsg>> testPipe = std::get<0>(pipes);
 
-    SdoClient<TestCard> client(nodeId, card);
+    SdoClient client(nodeId, card);
 
     BOOST_CHECK_EQUAL(TransStatus::NO_TRANS, client.getTransStatus());
     BOOST_CHECK_EQUAL(true, client.getSdoError().isNoError());

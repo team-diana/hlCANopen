@@ -7,6 +7,7 @@
 #include "hlcanopen/sdo_data_converter.hpp"
 #include "hlcanopen/sdo_error.hpp"
 #include "hlcanopen/can_msg.hpp"
+#include "hlcanopen/can_card.hpp"
 #include "hlcanopen/can_msg_utils.hpp"
 #include "hlcanopen/object_dictionary.hpp"
 #include "hlcanopen/utils.hpp"
@@ -38,18 +39,18 @@ struct PDOEntry {
 };
 
 
-template<template<typename C> class N, class C> class PdoClient {
+template<class N> class PdoClient {
     typedef boost::coroutines::asymmetric_coroutine<CanMsg> coroutine;
 
     // N is NodeManager, but we use a template parameter in order to allow
     // unit testing
-    N<C>& nodeManager;
+    N& nodeManager;
     std::map<COBId, std::vector<PDOEntry>> PDOMap;
     ObjectDictionary od;
-    C& card;
+    CanCard& card;
 
 public:
-    PdoClient(N<C>& nodeManager, C& card) :
+    PdoClient(N& nodeManager, CanCard& card) :
         nodeManager(nodeManager),
         card(card)
     {

@@ -8,6 +8,7 @@
 #include "hlcanopen/can_msg.hpp"
 #include "hlcanopen/can_msg_utils.hpp"
 #include "hlcanopen/utils.hpp"
+#include "hlcanopen/can_card.hpp"
 
 #include <experimental/optional>
 
@@ -31,11 +32,11 @@ enum {
     SDO_RECEIVE_COB_ID = 0b1100
 };
 
-template<class C> class SdoClient {
+class SdoClient {
     typedef boost::coroutines::asymmetric_coroutine<CanMsg> coroutine;
 
 public:
-    SdoClient(NodeId nodeId, C& card) :
+    SdoClient(NodeId nodeId, CanCard& card) :
         nodeId(nodeId),
         card(card),
         sdoCoroutine(nullptr),
@@ -242,7 +243,7 @@ private:
 
 private:
     NodeId nodeId;
-    C& card;
+    CanCard& card;
     std::unique_ptr<coroutine::push_type> sdoCoroutine;
     SdoData receivedData;
     TransStatus currentTransStatus;

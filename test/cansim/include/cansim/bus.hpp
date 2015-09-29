@@ -14,19 +14,19 @@
 #include <list>
 #include <memory>
 
-template <class U> class Card;
+class Card;
 
 // Non thread-safe message dispatcher
 template<typename T> class Bus {
-    template<class U> friend class Card;
+    friend class Card;
 
     struct CardSlot {
-        CardSlot(const Card<T>& card, Pipe<T>&& pipe) :
+        CardSlot(const Card& card, Pipe<T>&& pipe) :
             card(card),
             pipe(std::move(pipe)) {
         }
 
-        const Card<T>& card;
+        const Card& card;
         Pipe<T> pipe;
     };
 
@@ -40,23 +40,23 @@ public:
     }
 
 private:
-    void addCard(const Card<T>& card) {
+    void addCard(const Card& card) {
         cards.emplace_back(card, Pipe<T>());
     }
 
-    void removeCard(const Card<T>& card) {
+    void removeCard(const Card& card) {
         cards.remove_if([&](const CardSlot& c) {
             return c.card == card;
         });
     }
 
-    template<class M> void write(const Card<T>& card, const M& msg) {
+    template<class M> void write(const Card& card, const M& msg) {
         std::for_each(cards.begin(), cards.end(), [&](CardSlot& c) {
             if(c.card != card) c.pipe.write(msg);
         });
     }
 
-    T read(const Card<T>& card) {
+    T read(const Card& card) {
         for(auto& c : cards) {
             if(c.card == card) return c.pipe.read();
         }
