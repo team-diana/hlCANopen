@@ -11,11 +11,13 @@
 struct BusLessCard : public hlcanopen::CanCard {
 public:
     BusLessCard(std::shared_ptr<BiPipe<hlcanopen::CanMsg>> biPipe) :
+        CanCard(),
         biPipe(biPipe) {
 
     }
-    BusLessCard(const BusLessCard& card) : biPipe(card.biPipe) {
-     
+
+    BusLessCard(const BusLessCard& card) : CanCard(), biPipe(card.biPipe) {
+
     };
 
     virtual void write(const hlcanopen::CanMsg& canMsg) override {

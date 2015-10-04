@@ -35,6 +35,7 @@ add_library(hlcanopen SHARED
             src/sdo_client.cpp
             src/sdo_client_node_manager.cpp
             src/sdo_data_converter.cpp
+            src/can_open_manager.cpp
           )
 target_link_libraries(hlcanopen folly atomic pthread glog ${Boost_LIBRARIES})
 
@@ -57,6 +58,3 @@ add_test (NAME SdoCanOpenManager COMMAND SdoCanOpenManager_test)
 add_test (NAME PdoConfiguration COMMAND PdoConfiguration_test)
 add_test (NAME SdoCanOpenManagerTimeout COMMAND SdoCanOpenManagerTimeout_test)
 
-
-add_executable(testMain main.cpp)
-target_link_libraries(testMain hlcanopen)

@@ -14,6 +14,7 @@
 namespace hlcanopen {
 
 typedef boost::variant<uint32_t, int32_t, std::string> ODEntryValue;
+
 enum class EntryAccess : unsigned char {
     READONLY,
     WRITEONLY,

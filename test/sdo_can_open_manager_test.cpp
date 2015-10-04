@@ -206,7 +206,6 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRecursiveLambda) {
     managerB.setDefaultFutureExecutor(executor);
 
     std::atomic<int> counter(0);
-
     std::function<folly::Future<bool>(int32_t)> recursiveLambda = [&](int32_t value) {
       counter++;
       if(value == 1) {
@@ -232,6 +231,8 @@ BOOST_AUTO_TEST_CASE(SdoCanOpenManagerRecursiveLambda) {
     }
     managerA.writeSdoLocal(nodeA, sdoIndex1, 1);
     cout << "wrote new value" << endl;
+
+    result1.get();
 
     managerA.stop();
     managerB.stop();

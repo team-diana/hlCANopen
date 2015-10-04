@@ -23,7 +23,7 @@ class CanOpenManager {
 
 public:
     CanOpenManager(CanCard& card, std::chrono::milliseconds sleepInterval = std::chrono::milliseconds(150));
-    virtual ~CanOpenManager() {}
+    virtual ~CanOpenManager();
     void setupLogging();
     void setupLoggingUsingConfigurationDir(const char* dirname);
     void setDefaultFutureExecutor(std::shared_ptr<folly::Executor> ex);
