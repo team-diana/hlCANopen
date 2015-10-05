@@ -36,6 +36,7 @@ add_library(hlcanopen SHARED
             src/sdo_client_node_manager.cpp
             src/sdo_data_converter.cpp
             src/can_open_manager.cpp
+            src/node_manager.cpp
           )
 target_link_libraries(hlcanopen folly atomic pthread glog ${Boost_LIBRARIES})
 

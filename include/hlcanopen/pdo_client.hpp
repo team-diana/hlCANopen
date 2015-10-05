@@ -95,6 +95,8 @@ public:
         return nodeManager.template writeSdoRemote<uint32_t>(SDOIndex(index + 0x200, 0), (uint8_t) i - 1).wait();
     }
 
+
+
     void writeConfiguration(PdoConfiguration configuration) {
         unsigned int index = configuration.getPdoNumber() - 1;
 
