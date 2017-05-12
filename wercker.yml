@@ -11,7 +11,8 @@ build:
         name: build
         code: |
           git clone https://github.com/team-diana/hlCANopen.git
-          mkdir build
+          rm -r build
+          mkdir -p build
           cd build
           cmake .. -DCMAKE_CXX_COMPILER=/usr/bin/g++-5 -DCMAKE_C_COMPILER=/usr/bin/gcc-5 -DBOOST_ROOT=/opt/boost
           make 
